@@ -1,5 +1,5 @@
 {
-  "name": "typescript-vite-starter",
+  "name": "treetalk",
   "private": false,
   "version": "0.0.1",
   "type": "module",
@@ -7,13 +7,20 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint src",
-    "lint:fix": "eslint src --fix"
+    "lint:fix": "eslint src --fix",
+    "serve": "serve dist/"
+  },
+  "author": {
+    "name": "Karolis Strazdas",
+    "email": "karolis.strazdas@protonmail.com",
+    "url": "https://karolis-strazdas.info"
   },
   "devDependencies": {
     "@eslint/js": "^9.1.1",
     "@types/eslint__js": "^8.42.3",
     "eslint": "^8.57.0",
     "sass": "^1.69.5",
+    "serve": "^14.2.3",
     "typescript": "^5.4.5",
     "typescript-eslint": "^7.7.1",
     "vite": "^5.0.8"

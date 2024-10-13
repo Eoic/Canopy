@@ -1,9 +1,7 @@
-# TypeScript Vite starter template
+# TreeTalk
+Create and engage in discussions to grow the infinite virtual forest. 
 
-Front-end TypeScript starter with Vite and ESLint configuration.
-
-### Installation and usage
-
+## Installation and usage
 1. Install dependencies:
 
    ```
@@ -16,4 +14,4 @@ Front-end TypeScript starter with Vite and ESLint configuration.
    npm run dev
    ```
 
-For lint and build commands, see [package.json](./package.json).
+For linting and build commands, see [package.json](./package.json).
