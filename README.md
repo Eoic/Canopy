@@ -1,4 +1,4 @@
-# TreeTalk
+# Rustle
 Create and engage in discussions to grow the infinite virtual forest. 
 
 ## Installation and usage
@@ -14,4 +14,4 @@ Create and engage in discussions to grow the infinite virtual forest.
    npm run dev
    ```
 
-For linting and build commands, see [package.json](./package.json).
+See [package.json](./package.json) for linting and build commands.
