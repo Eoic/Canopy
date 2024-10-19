@@ -15,6 +15,10 @@
     "email": "karolis.strazdas@protonmail.com",
     "url": "https://karolis-strazdas.info"
   },
+  "dependencies": {
+    "pixi-viewport": "^5.0.2",
+    "pixi.js": "^7.4.2"
+  },
   "devDependencies": {
     "@eslint/js": "^9.1.1",
     "@types/eslint__js": "^8.42.3",
