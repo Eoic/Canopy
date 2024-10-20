@@ -1,0 +1,21 @@
+{
+    "bundles":[
+       {
+          "name":"treeOne",
+          "assets":[
+             {
+                "alias":"treeOne/small",
+                "src":"assets/trees/treeOne/small.png"
+             },
+             {
+                "alias":"treeOne/medium",
+                "src":"assets/trees/treeOne/medium.png"
+             },
+             {
+                "alias":"treeOne/large",
+                "src":"assets/trees/treeOne/large.png"
+             }
+          ]
+       }
+    ]
+ }

@@ -7,7 +7,8 @@ import {
     WORLD_WIDTH,
     CELL_HALF_SIZE,
     ZOOM,
-    CELL_COLOR
+    CELL_COLOR,
+    CELL_FULL_SIZE
 } from './constants';
 import { Layers } from './layers';
 import { SelectionManager } from './selection-manager';
@@ -23,17 +24,39 @@ export class Scene {
     private readonly _graphics: PIXI.Graphics;
 
     private _background: PIXI.TilingSprite;
-    private _selectionManager: SelectionManager;
+    private _selectionManager?: SelectionManager;
 
     constructor() {
         this._app = this.setupApp(document.body);
         this._viewport = this.setupViewport(this._app);
         this._graphics = new PIXI.Graphics();
         this._background = this.setupBackground();
-        this._viewport.addChild(this._background);
-        this._selectionManager = new SelectionManager(this._app, this._viewport);
-        this._selectionManager.enable();
-        this.setupEvents();
+
+        this.loadAssets().then(async () => {
+            this._selectionManager = new SelectionManager(this._app, this._viewport);
+            this._viewport.addChild(this._background);
+            this._selectionManager.enable();
+            this.setupEvents();
+
+            await PIXI.Assets.loadBundle(['treeOne']);
+            const trees = PIXI.Assets.get<PIXI.Texture>(['treeOne/small', 'treeOne/medium', 'treeOne/large']);
+
+            if (trees) {
+                let i = 0;
+
+                for (const texture of Object.values(trees)) {
+                    const sprite = new PIXI.Sprite(texture);
+                    sprite.position.set(i * CELL_FULL_SIZE, 0);
+                    sprite.anchor.x = 0.5;
+                    sprite.anchor.y = 0.5;
+                    sprite.zIndex = Layers.Trees;
+                    this._viewport.addChild(sprite);
+                    i++;
+                }
+            }
+        }).catch((error) => {
+            console.error(error);
+        });
     }
 
     private setupApp(container: HTMLElement): PIXI.Application<HTMLCanvasElement> {
@@ -137,6 +160,10 @@ export class Scene {
         this._app.renderer.view.addEventListener('pointerdown', this.handleAppPointerDown);
         this._app.renderer.view.addEventListener('pointermove', this.handleAppPointerMove);
         this._app.renderer.view.addEventListener('pointerup', this.handleAppPointerUp);
+    }
+
+    public async loadAssets() {
+        await PIXI.Assets.init({ manifest: 'assets/manifest.json' });
     }
 
     private handleAppPointerDown = (_event: PointerEvent) => { };
