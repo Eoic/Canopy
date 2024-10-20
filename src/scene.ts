@@ -1,19 +1,24 @@
 import * as PIXI from 'pixi.js';
 import { Viewport } from 'pixi-viewport';
-import { CELL_LINE_WIDTH, CELL_SIZE, WORLD_BACKGROUND_COLOR, WORLD_HEIGHT, WORLD_WIDTH } from './constants';
+import { CELL_LINE_WIDTH, CELL_SIZE, WORLD_HEIGHT, WORLD_WIDTH } from './constants';
 
 export class Scene {
     private readonly _viewport: Viewport;
     private readonly _app: PIXI.Application<HTMLCanvasElement>;
     private readonly _graphics: PIXI.Graphics;
 
+    private _background: PIXI.TilingSprite;
+    private _marker: PIXI.TilingSprite;
+
     constructor() {
         this._app = this.setupApp(document.body);
         this._viewport = this.setupViewport(this._app);
         this._graphics = new PIXI.Graphics();
-        this._viewport.addChild(this._graphics);
+        this._background = this.setupBackground();
+        this._marker = this.setupMarker();
+        this._viewport.addChild(this._background);
+        this._viewport.addChild(this._marker);
         this.setupEvents();
-        this.drawGrid();
     }
 
     private setupApp(container: HTMLElement): PIXI.Application<HTMLCanvasElement> {
@@ -23,7 +28,6 @@ export class Scene {
             autoDensity: true,
             width: window.innerWidth,
             height: window.innerHeight,
-            backgroundColor: WORLD_BACKGROUND_COLOR,
             resolution: 2,
         });
 
@@ -49,53 +53,89 @@ export class Scene {
             .pinch()
             .wheel()
             .clampZoom({
-                minScale: 0.15,
-                maxScale: 12.50,
+                minScale: 0.25,
+                maxScale: 5,
             });
 
         viewport.fit();
         viewport.moveCenter(WORLD_WIDTH / 2, WORLD_HEIGHT / 2);
-
-
-        viewport.on('zoomed', (e) => {
-            this.drawGrid();
+        viewport.on('moved', (_event) => {
+            this.updateBackground();
+            this.updateMarker();
         });
 
-        // viewport.on('moved', (e) => {
-        //     this.drawGrid();
-        // });
+        viewport.on('zoomed', (_event) => {
+            this.updateBackground({ isReplaceNeeded: true });
+            this.updateMarker({ isReplaceNeeded: true });
+        });
 
         return viewport;
     }
 
-    private drawGrid() {
-        const { top, right, bottom, left } = this._app.view.getBoundingClientRect();
-        const tl = this._viewport.toWorld({ x: left, y: top });
-        const br = this._viewport.toWorld({ x: right, y: bottom });
-
-        // const rows = Math.ceil((right - left) / CELL_SIZE);
-        // const cols = Math.ceil((bottom - top) / CELL_SIZE);
-
-        const { x, y, width, height } = this._viewport.getBounds();
-        const topLeft = { x, y };
-        const bottomRight = { x: width - x, y: height - y };
-        const rows = Math.trunc((width) / CELL_SIZE);
-        const cols = Math.trunc((height) / CELL_SIZE);
-
-        // console.log(topLeft, bottomRight);
+    private setupBackground(): PIXI.TilingSprite {
         this._graphics.clear();
-        this._graphics.lineStyle({ color: '#FF0000', width: CELL_LINE_WIDTH });
 
-        this._graphics.drawCircle(tl.x, tl.y, CELL_SIZE);
-        // for (let y = 0; y <= cols; y++) {
-        //     this._graphics.moveTo(topLeft.x, topLeft.y + CELL_SIZE * y);
-        //     this._graphics.lineTo(bottomRight.x, topLeft.y + CELL_SIZE * y);
-        // }
+        this._graphics.lineStyle({ width: CELL_LINE_WIDTH, color: 0xadc178 });
+        this._graphics.beginFill(0xf0ead2);
+        this._graphics.drawRect(0, 0, CELL_SIZE, CELL_SIZE);
+        this._graphics.endFill();
 
-        // for (let x = 0; x <= rows; x++) {
-        //     this._graphics.moveTo(topLeft.x + CELL_SIZE * x, topLeft.y);
-        //     this._graphics.lineTo(topLeft.x + CELL_SIZE * x, bottomRight.y);
-        // }
+        const texture = this._app.renderer.generateTexture(this._graphics);
+
+        const sprite = new PIXI.TilingSprite(
+            texture,
+            this._viewport.worldScreenWidth,
+            this._viewport.worldScreenHeight
+        );
+
+        sprite.tilePosition.x = -this._viewport.left;
+        sprite.tilePosition.y = -this._viewport.top;
+        sprite.x = this._viewport.left;
+        sprite.y = this._viewport.top;
+
+        return sprite;
+    }
+
+    private setupMarker(): PIXI.TilingSprite {
+        this._graphics.clear();
+
+        this._graphics.lineStyle({ width: 0 });
+        this._graphics.beginFill(0xbfd8bd);
+        this._graphics.drawRect(0, 0, this._background.texture.width, this._background.texture.height);
+        this._graphics.endFill();
+
+        const texture = this._app.renderer.generateTexture(this._graphics);
+
+        const sprite = new PIXI.TilingSprite(
+            texture,
+            CELL_SIZE - CELL_LINE_WIDTH + 6,
+            CELL_SIZE - CELL_LINE_WIDTH + 6
+        );
+
+        return sprite;
+    }
+
+    private updateBackground(options: { isReplaceNeeded?: boolean } = {}) {
+        if (options.isReplaceNeeded) {
+            const index = this._viewport.getChildIndex(this._background);
+            this._viewport.removeChildAt(index);
+            this._background = this.setupBackground();
+            this._viewport.addChild(this._background);
+        }
+
+        this._background.tilePosition.x = -this._viewport.left;
+        this._background.tilePosition.y = -this._viewport.top;
+        this._background.x = this._viewport.left;
+        this._background.y = this._viewport.top;
+    }
+
+    private updateMarker(options: { isReplaceNeeded?: boolean } = {}) {
+        if (options.isReplaceNeeded) {
+            const index = this._viewport.getChildIndex(this._marker);
+            this._viewport.removeChildAt(index);
+            this._marker = this.setupMarker();
+            this._viewport.addChild(this._marker);
+        }
     }
 
     private setupEvents() {
@@ -111,7 +151,20 @@ export class Scene {
     };
 
     private handleAppPointerMove = (_event: PointerEvent) => {
+        const worldPosition = this._viewport.toWorld({ x: _event.clientX, y: _event.clientY });
 
+        const cellSize = this._marker.texture.width;
+        const snappedX = Math.round(worldPosition.x / cellSize) * cellSize;
+        const snappedY = Math.round(worldPosition.y / cellSize) * cellSize;
+
+        worldPosition.x = snappedX;
+        worldPosition.y = snappedY;
+
+        this._marker.position.set(worldPosition.x, worldPosition.y);
+        this._marker.tilePosition.x = -worldPosition.x;
+        this._marker.tilePosition.y = -worldPosition.y;
+        this._marker.x = worldPosition.x;
+        this._marker.y = worldPosition.y;
     };
 
     private handleAppPointerUp = (_event: PointerEvent) => {
@@ -121,6 +174,8 @@ export class Scene {
     private handleWindowResize = () => {
         this._app?.resize();
         this._viewport?.resize(window.innerWidth, window.innerHeight);
+        this.updateBackground({ isReplaceNeeded: true });
+        this.updateMarker({ isReplaceNeeded: true });
     };
 
     private handleWindowMouseDown = (event: MouseEvent) => {
