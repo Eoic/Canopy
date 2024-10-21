@@ -1,5 +1,5 @@
 # Rustle
-Create and engage in discussions to grow the infinite virtual forest. 
+Create and engage in real-time discussions to grow the infinite virtual forest. 
 
 ## Installation and usage
 ### Client
