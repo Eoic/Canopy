@@ -2,16 +2,28 @@
 Create and engage in discussions to grow the infinite virtual forest. 
 
 ## Installation and usage
+### Client
 1. Install dependencies:
-
    ```
-   npm install
+   npm ci
    ```
-
+2. Copy `.env.example` to `.env` and set the required environment variables.
 2. Start development server:
-
    ```
    npm run dev
    ```
-
 See [package.json](./package.json) for linting and build commands.
+
+### Server
+1. Change the directory to `server/`.
+2. Create a virtual environment and install dependencies:
+   ```
+   python -m venv .venv
+   . .venv/bin/activate
+   pip install -r requirements.txt
+   ```
+3. Run the server:
+   ```
+   ./run.sh
+   ```
+4. By default, the server is running on `http://127.0.0.1:8000`.
