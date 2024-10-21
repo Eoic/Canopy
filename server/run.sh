@@ -1,3 +1,3 @@
 #!/bin/bash
 . .venv/bin/activate
-fastapi dev main.py
+fastapi dev src/main.py
