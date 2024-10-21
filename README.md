@@ -12,7 +12,7 @@ Create and engage in real-time discussions to grow the infinite virtual forest.
    ```
    npm run dev
    ```
-4. By default, the client runs on [http://127.0.0.1:5137](http://127.0.0.1:5137).
+4. By default, the client runs on [http://127.0.0.1:5173/](http://127.0.0.1:5173/).
 
 See [package.json](./package.json) for linting and build commands.
 
@@ -28,4 +28,4 @@ See [package.json](./package.json) for linting and build commands.
    ```
    ./run.sh
    ```
-4. By default, the server runs on [http://127.0.0.1:8000](http://127.0.0.1:8000).
+4. By default, the server runs on [http://127.0.0.1:8000/](http://127.0.0.1:8000/).
