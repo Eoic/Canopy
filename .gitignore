@@ -27,3 +27,4 @@ dist-ssr
 # Python.
 **/.venv/*
 **/__pycache__/
+**/rustle.db
