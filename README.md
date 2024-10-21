@@ -1,7 +1,7 @@
 # Rustle
 Create and engage in real-time discussions to grow the infinite virtual forest. 
 
-## Installation and usage
+## Development
 ### Client
 1. Install dependencies:
    ```
