@@ -8,10 +8,12 @@ Create and engage in discussions to grow the infinite virtual forest.
    npm ci
    ```
 2. Copy `.env.example` to `.env` and set the required environment variables.
-2. Start development server:
+3. Start the development server:
    ```
    npm run dev
    ```
+4. By default, the client runs on [http://127.0.0.1:5137](http://127.0.0.1:5137).
+
 See [package.json](./package.json) for linting and build commands.
 
 ### Server
@@ -26,4 +28,4 @@ See [package.json](./package.json) for linting and build commands.
    ```
    ./run.sh
    ```
-4. By default, the server is running on `http://127.0.0.1:8000`.
+4. By default, the server runs on [http://127.0.0.1:8000](http://127.0.0.1:8000).
