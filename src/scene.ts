@@ -33,8 +33,8 @@ export class Scene {
         this._background = this.setupBackground();
 
         this.loadAssets().then(async () => {
-            this._selectionManager = new SelectionManager(this._app, this._viewport);
             this._viewport.addChild(this._background);
+            this._selectionManager = new SelectionManager(this._app, this._viewport);
             this._selectionManager.enable();
             this.setupEvents();
 

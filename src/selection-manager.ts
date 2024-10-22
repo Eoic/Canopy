@@ -2,7 +2,8 @@ import * as PIXI from 'pixi.js';
 import { Layers } from './layers';
 import { Vector } from './math/vector';
 import { Viewport } from 'pixi-viewport';
-import { CELL_SIZE, CELL_LINE_WIDTH, CELL_COLOR, CELL_FULL_SIZE, CELL_HALF_SIZE } from './constants';
+import { CELL_SIZE, CELL_LINE_WIDTH, CELL_COLOR, CELL_FULL_SIZE } from './constants';
+import { PositionConverter } from './math/position-converter';
 
 export class SelectionManager {
     private _viewport: Viewport;
@@ -11,6 +12,7 @@ export class SelectionManager {
     private _selectionMarker: PIXI.Sprite;
     private _currentCell: Vector = new Vector();
     private _selectedCell: Vector = new Vector();
+    private _positionConverter: PositionConverter;
     private readonly _events: Record<string, EventListenerOrEventListenerObject> = {};
 
     constructor(app: PIXI.Application<HTMLCanvasElement>, viewport: Viewport) {
@@ -18,6 +20,7 @@ export class SelectionManager {
         this._viewport = viewport;
         this._selectionMarker = this.setupMarker(CELL_COLOR.SELECTION_FILL, Layers.SelectionCell);
         this._hoverMarker = this.setupMarker(CELL_COLOR.HOVER_FILL, Layers.HoverCell);
+        this._positionConverter = new PositionConverter(this._viewport);
 
         this._events = {
             'pointerdown': this.handleAppPointerDown as EventListener,
@@ -88,11 +91,9 @@ export class SelectionManager {
     };
 
     private handleAppPointerMove = (event: PointerEvent) => {
-        const worldPosition = this._viewport.toWorld({ x: event.clientX, y: event.clientY });
-        worldPosition.x = Math.floor((worldPosition.x + CELL_HALF_SIZE) / CELL_FULL_SIZE) * CELL_FULL_SIZE;
-        worldPosition.y = Math.floor((worldPosition.y + CELL_HALF_SIZE) / CELL_FULL_SIZE) * CELL_FULL_SIZE;
-
-        this._currentCell.set(worldPosition.x / CELL_FULL_SIZE, worldPosition.y / CELL_FULL_SIZE);
+        const worldPosition = this._positionConverter.worldPosition(event);
+        const cellPosition = this._positionConverter.worldToCell(worldPosition);
+        this._currentCell.set(cellPosition.x, cellPosition.y);
         this._hoverMarker.position.set(worldPosition.x, worldPosition.y);
         this._hoverMarker.visible = true;
     };

@@ -13,6 +13,6 @@ export const CELL_HALF_SIZE = CELL_FULL_SIZE / 2;
 export const CELL_COLOR = {
     FILL: 0xf0ead2,
     HOVER_FILL: 0xbfd8bd,
-    SELECTION_FILL: 0xafa9f9,
+    SELECTION_FILL: 0xb5e48c,
     BORDER: 0xadc178,
 };
