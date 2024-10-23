@@ -7,7 +7,7 @@ import { PositionConverter } from './math/position-converter';
 
 export class SelectionManager {
     private _viewport: Viewport;
-    private _app: PIXI.Application<HTMLCanvasElement>;
+    private _app: PIXI.Application;
     private _hoverMarker: PIXI.Sprite;
     private _selectionMarker: PIXI.Sprite;
     private _currentCell: Vector = new Vector();
@@ -15,7 +15,7 @@ export class SelectionManager {
     private _positionConverter: PositionConverter;
     private readonly _events: Record<string, EventListenerOrEventListenerObject> = {};
 
-    constructor(app: PIXI.Application<HTMLCanvasElement>, viewport: Viewport) {
+    constructor(app: PIXI.Application, viewport: Viewport) {
         this._app = app;
         this._viewport = viewport;
         this._selectionMarker = this.setupMarker(CELL_COLOR.SELECTION_FILL, Layers.SelectionCell);
@@ -44,20 +44,20 @@ export class SelectionManager {
 
     private addEvents() {
         for (const [eventName, handler] of Object.entries(this._events))
-            this._app.renderer.view.addEventListener(eventName, handler);
+            this._app.renderer.canvas.addEventListener(eventName, handler);
     }
 
     private removeEvents() {
         for (const [eventName, handler] of Object.entries(this._events))
-            this._app.renderer.view.removeEventListener(eventName, handler);
+            this._app.renderer.canvas.removeEventListener(eventName, handler);
     }
 
     private setupMarker(fillColor: number, layerZIndex: number): PIXI.Sprite {
         const graphics = new PIXI.Graphics();
 
-        graphics.beginFill(fillColor);
-        graphics.drawRect(0, 0, CELL_SIZE - CELL_LINE_WIDTH, CELL_SIZE - CELL_LINE_WIDTH);
-        graphics.endFill();
+        graphics
+            .rect(0, 0, CELL_SIZE - CELL_LINE_WIDTH, CELL_SIZE - CELL_LINE_WIDTH)
+            .fill(fillColor);
 
         const texture = this._app.renderer.generateTexture(graphics);
         const marker = new PIXI.Sprite(texture);

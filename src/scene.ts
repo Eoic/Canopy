@@ -19,59 +19,45 @@ type ViewportEvent = {
 };
 
 export class Scene {
-    private readonly _viewport: Viewport;
-    private readonly _app: PIXI.Application<HTMLCanvasElement>;
-    private readonly _graphics: PIXI.Graphics;
-
-    private _background: PIXI.TilingSprite;
+    private _app!: PIXI.Application;
+    private _viewport!: Viewport;
+    private _background!: PIXI.TilingSprite;
     private _selectionManager?: SelectionManager;
 
     constructor() {
-        this._app = this.setupApp(document.body);
-        this._viewport = this.setupViewport(this._app);
-        this._graphics = new PIXI.Graphics();
-        this._background = this.setupBackground();
-
-        this.loadAssets().then(async () => {
+        this.setupApp(document.body).then(async (app: PIXI.Application) => {
+            this._app = app;
+            this._viewport = this.setupViewport(this._app);
+            this._background = this.setupBackground();
             this._viewport.addChild(this._background);
             this._selectionManager = new SelectionManager(this._app, this._viewport);
             this._selectionManager.enable();
             this.setupEvents();
 
-            await PIXI.Assets.loadBundle(['treeOne']);
-            const trees = PIXI.Assets.get<PIXI.Texture>(['treeOne/small', 'treeOne/medium', 'treeOne/large']);
-
-            if (trees) {
-                let i = 0;
-
-                for (const texture of Object.values(trees)) {
-                    const sprite = new PIXI.Sprite(texture);
-                    sprite.position.set(i * CELL_FULL_SIZE, 0);
-                    sprite.anchor.x = 0.5;
-                    sprite.anchor.y = 0.5;
-                    sprite.zIndex = Layers.Trees;
-                    this._viewport.addChild(sprite);
-                    i++;
-                }
-            }
+            await this.loadAssets();
         }).catch((error) => {
             console.error(error);
         });
     }
 
-    private setupApp(container: HTMLElement): PIXI.Application<HTMLCanvasElement> {
-        const app = new PIXI.Application<HTMLCanvasElement>({
-            resizeTo: window,
-            antialias: true,
-            autoDensity: true,
-            width: window.innerWidth,
-            height: window.innerHeight,
-            resolution: 2,
+    private setupApp(container: HTMLElement): Promise<PIXI.Application> {
+        return new Promise((resolve, reject) => {
+            const app = new PIXI.Application();
+
+            app.init({
+                antialias: true,
+                resizeTo: window,
+                autoDensity: true,
+                width: window.innerWidth,
+                height: window.innerHeight,
+                resolution: 1,
+            }).then(() => {
+                container.appendChild(app.canvas);
+                resolve(app);
+            }).catch((reason) => {
+                reject(reason);
+            });
         });
-
-        container.appendChild(app.view);
-
-        return app;
     }
 
     private setupViewport(app: PIXI.Application): Viewport {
@@ -108,13 +94,14 @@ export class Scene {
     }
 
     private createBackground() {
-        this._graphics.clear();
-        this._graphics.beginFill(CELL_COLOR.FILL);
-        this._graphics.lineStyle({ width: CELL_LINE_WIDTH, color: CELL_COLOR.BORDER });
-        this._graphics.drawRect(0, 0, CELL_SIZE, CELL_SIZE);
-        this._graphics.endFill();
+        const graphics = new PIXI.Graphics();
 
-        const texture = this._app.renderer.generateTexture(this._graphics);
+        graphics
+            .rect(0, 0, CELL_SIZE, CELL_SIZE)
+            .fill(CELL_COLOR.FILL)
+            .stroke({ width: CELL_LINE_WIDTH, color: CELL_COLOR.BORDER });
+
+        const texture = this._app.renderer.generateTexture(graphics);
 
         const background = new PIXI.TilingSprite(
             texture,
@@ -157,13 +144,30 @@ export class Scene {
     private setupEvents() {
         window.addEventListener('resize', this.handleWindowResize);
         window.addEventListener('mousedown', this.handleWindowMouseDown);
-        this._app.renderer.view.addEventListener('pointerdown', this.handleAppPointerDown);
-        this._app.renderer.view.addEventListener('pointermove', this.handleAppPointerMove);
-        this._app.renderer.view.addEventListener('pointerup', this.handleAppPointerUp);
+        this._app.renderer.canvas.addEventListener('pointerdown', this.handleAppPointerDown);
+        this._app.renderer.canvas.addEventListener('pointermove', this.handleAppPointerMove);
+        this._app.renderer.canvas.addEventListener('pointerup', this.handleAppPointerUp);
     }
 
     public async loadAssets() {
         await PIXI.Assets.init({ manifest: 'assets/manifest.json' });
+        await PIXI.Assets.loadBundle(['treeOne']);
+
+        const trees = PIXI.Assets.get<PIXI.Texture>(['treeOne/small', 'treeOne/medium', 'treeOne/large']);
+
+        if (trees) {
+            let i = 0;
+
+            for (const texture of Object.values(trees)) {
+                const sprite = new PIXI.Sprite(texture);
+                sprite.position.set(i * CELL_FULL_SIZE, 0);
+                sprite.anchor.x = 0.5;
+                sprite.anchor.y = 0.5;
+                sprite.zIndex = Layers.Trees;
+                this._viewport.addChild(sprite);
+                i++;
+            }
+        }
     }
 
     private handleAppPointerDown = (_event: PointerEvent) => { };

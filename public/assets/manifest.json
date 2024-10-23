@@ -16,7 +16,44 @@
                 "src":"assets/trees/treeOne/large.png"
              }
           ]
-       }
+       },
+       {
+         "name":"icons",
+         "assets":[
+            {
+               "alias":"icons/circle-minus",
+               "src":"assets/icons/circle-minus.svg"
+            },
+            {
+               "alias":"icons/circle-plus",
+               "src":"assets/icons/circle-plus.svg"
+            },
+            {
+               "alias":"icons/map-location-dot",
+               "src":"assets/icons/map-location-dot.svg"
+            },
+            {
+               "alias":"icons/pen",
+               "src":"assets/icons/pen.svg"
+            },
+            {
+               "alias":"icons/reply",
+               "src":"assets/icons/reply.svg"
+            },
+            {
+               "alias":"icons/share",
+               "src":"assets/icons/share.svg"
+            },
+            {
+               "alias":"icons/thumbtack-slash",
+               "src":"assets/icons/thumbtack-slash.svg"
+            },
+            {
+               "alias":"icons/thumbtack",
+               "src":"assets/icons/thumbtack.svg"
+            }
+         ]
+      }
     ]
  }
  
