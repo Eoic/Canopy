@@ -1,19 +1,19 @@
 {
     "bundles":[
        {
-          "name":"treeOne",
+          "name":"tree-one",
           "assets":[
              {
-                "alias":"treeOne/small",
-                "src":"assets/trees/treeOne/small.png"
+                "alias":"tree-small-one",
+                "src":"assets/trees/one/small.png"
              },
              {
-                "alias":"treeOne/medium",
-                "src":"assets/trees/treeOne/medium.png"
+                "alias":"tree-medium-one",
+                "src":"assets/trees/one/medium.png"
              },
              {
-                "alias":"treeOne/large",
-                "src":"assets/trees/treeOne/large.png"
+                "alias":"tree-large-one",
+                "src":"assets/trees/one/large.png"
              }
           ]
        },
@@ -21,35 +21,35 @@
          "name":"icons",
          "assets":[
             {
-               "alias":"icons/circle-minus",
+               "alias":"icon-circle-minus",
                "src":"assets/icons/circle-minus.svg"
             },
             {
-               "alias":"icons/circle-plus",
+               "alias":"icon-circle-plus",
                "src":"assets/icons/circle-plus.svg"
             },
             {
-               "alias":"icons/map-location-dot",
+               "alias":"icon-map-location-dot",
                "src":"assets/icons/map-location-dot.svg"
             },
             {
-               "alias":"icons/pen",
+               "alias":"icon-pen",
                "src":"assets/icons/pen.svg"
             },
             {
-               "alias":"icons/reply",
+               "alias":"icon-reply",
                "src":"assets/icons/reply.svg"
             },
             {
-               "alias":"icons/share",
+               "alias":"icon-share",
                "src":"assets/icons/share.svg"
             },
             {
-               "alias":"icons/thumbtack-slash",
+               "alias":"icon-thumbtack-slash",
                "src":"assets/icons/thumbtack-slash.svg"
             },
             {
-               "alias":"icons/thumbtack",
+               "alias":"icon-thumbtack",
                "src":"assets/icons/thumbtack.svg"
             }
          ]

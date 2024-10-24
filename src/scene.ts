@@ -14,6 +14,7 @@ import {
 } from './constants';
 import { Layers } from './layers';
 import { SelectionManager } from './selection-manager';
+import { RadialMenu } from './ui/radial-menu';
 
 type ViewportEvent = {
     type: string;
@@ -153,55 +154,15 @@ export class Scene {
 
     public async loadAssets() {
         await PIXI.Assets.init({ manifest: 'assets/manifest.json' });
-        await PIXI.Assets.loadBundle(['treeOne']);
+        await PIXI.Assets.loadBundle(['tree-one']);
 
-        const graphics = new PIXI.Graphics().svg(`
-            <svg height="400" width="450" xmlns="http://www.w3.org/2000/svg">
-                <!-- Draw the paths -->
-                <path id="lineAB" d="M 100 350 l 150 -300" stroke="red" stroke-width="4"/>
-                <path id="lineBC" d="M 250 50 l 150 300" stroke="red" stroke-width="4"/>
-                <path id="lineMID" d="M 175 200 l 150 0" stroke="green" stroke-width="4"/>
-                <path id="lineAC" d="M 100 350 q 150 -300 300 0" stroke="blue" fill="none" stroke-width="4"/>
+        PIXI.Assets.setPreferences({ parseAsGraphicsContext: true });
+        await PIXI.Assets.loadBundle(['icons']);
 
-                <!-- Mark relevant points -->
-                <g stroke="black" stroke-width="3" fill="black">
-                    <circle id="pointA" cx="100" cy="350" r="4" />
-                    <circle id="pointB" cx="250" cy="50" r="4" />
-                    <circle id="pointC" cx="400" cy="350" r="4" />
-                </g>
-            </svg>
-        `);
+        const menu = RadialMenu.build();
+        this._viewport.addChild(menu);
 
-        graphics.zIndex = 100;
-        this._viewport.addChild(graphics);
-
-        // PIXI.Assets.setPreferences({ parseAsGraphicsContext: true });
-        // await PIXI.Assets.loadBundle(['icons']);
-
-        // const icons = PIXI.Assets.get<PIXI.GraphicsContext>(['icons/circle-plus']);
-
-        // if (icons) {
-        //     let i = 0;
-
-        //     for (const svg of Object.values(icons)) {
-        //         const graphics = new PIXI.Graphics(svg);
-        //         graphics.position.set(140, 150);
-        //         graphics.width = 100;
-        //         graphics.height = 100;
-
-        //         const bounds = graphics.getLocalBounds();
-
-        //         graphics.pivot.set((bounds.x + bounds.width) / 2, (bounds.y + bounds.height) / 2);
-
-        //         graphics.position.set(this._app.screen.width / 2, this._app.screen.height / 2);
-
-        //         this._app.stage.addChild(graphics);
-        //         // this._viewport.addChild(graphics);
-        //         i++;
-        //     }
-        // }
-
-        const trees = PIXI.Assets.get<PIXI.Texture>(['treeOne/small', 'treeOne/medium', 'treeOne/large']);
+        const trees = PIXI.Assets.get<PIXI.Texture>(['tree-small-one', 'tree-medium-one', 'tree-large-one']);
 
         if (trees) {
             let i = 0;
