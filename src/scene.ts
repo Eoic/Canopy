@@ -1,6 +1,5 @@
 import * as PIXI from 'pixi.js';
 import { Viewport } from 'pixi-viewport';
-import circlePlus from '../public/assets/icons/circle-plus.svg';
 
 import {
     CELL_LINE_WIDTH,
