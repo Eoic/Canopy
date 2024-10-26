@@ -11,9 +11,8 @@ import {
     CELL_COLOR,
     CELL_FULL_SIZE
 } from './constants';
-import { Layers } from './layers';
+import { Layer } from './layers';
 import { SelectionManager } from './selection-manager';
-import { RadialMenu } from './ui/radial-menu';
 
 type ViewportEvent = {
     type: string;
@@ -111,7 +110,7 @@ export class Scene {
             this._viewport.worldScreenHeight
         );
 
-        background.zIndex = Layers.Ground;
+        background.zIndex = Layer.Ground;
 
         return this.updateBackground(background);
     }
@@ -153,13 +152,7 @@ export class Scene {
 
     public async loadAssets() {
         await PIXI.Assets.init({ manifest: 'assets/manifest.json' });
-        await PIXI.Assets.loadBundle(['tree-one']);
-
-        PIXI.Assets.setPreferences({ parseAsGraphicsContext: true });
-        await PIXI.Assets.loadBundle(['icons']);
-
-        const menu = RadialMenu.build();
-        this._viewport.addChild(menu);
+        await PIXI.Assets.loadBundle(['tree-one', 'icons']);
 
         const trees = PIXI.Assets.get<PIXI.Texture>(['tree-small-one', 'tree-medium-one', 'tree-large-one']);
 
@@ -171,7 +164,7 @@ export class Scene {
                 sprite.position.set(i * CELL_FULL_SIZE, 0);
                 sprite.anchor.x = 0.5;
                 sprite.anchor.y = 0.5;
-                sprite.zIndex = Layers.Trees;
+                sprite.zIndex = Layer.Trees;
                 this._viewport.addChild(sprite);
                 i++;
             }

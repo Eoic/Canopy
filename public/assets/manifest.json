@@ -22,35 +22,31 @@
          "assets":[
             {
                "alias":"icon-circle-minus",
-               "src":"assets/icons/circle-minus.svg"
+               "src":"assets/icons/png/circle-minus.png"
             },
             {
                "alias":"icon-circle-plus",
-               "src":"assets/icons/circle-plus.svg"
+               "src":"assets/icons/png/circle-plus.png"
             },
             {
                "alias":"icon-map-location-dot",
-               "src":"assets/icons/map-location-dot.svg"
+               "src":"assets/icons/png/map-location-dot.png"
             },
             {
                "alias":"icon-pen",
-               "src":"assets/icons/pen.svg"
+               "src":"assets/icons/png/pen.png"
             },
             {
                "alias":"icon-reply",
-               "src":"assets/icons/reply.svg"
-            },
-            {
-               "alias":"icon-share",
-               "src":"assets/icons/share.svg"
+               "src":"assets/icons/png/reply.png"
             },
             {
                "alias":"icon-thumbtack-slash",
-               "src":"assets/icons/thumbtack-slash.svg"
+               "src":"assets/icons/png/thumbtack-slash.png"
             },
             {
                "alias":"icon-thumbtack",
-               "src":"assets/icons/thumbtack.svg"
+               "src":"assets/icons/png/thumbtack.png"
             }
          ]
       }

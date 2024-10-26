@@ -1,11 +1,14 @@
 import * as PIXI from 'pixi.js';
-import { Layers } from './layers';
+import { Layer } from './layers';
 import { Vector } from './math/vector';
 import { Viewport } from 'pixi-viewport';
-import { CELL_SIZE, CELL_LINE_WIDTH, CELL_COLOR, CELL_FULL_SIZE } from './constants';
+import { CELL_SIZE, CELL_LINE_WIDTH, CELL_COLOR, CELL_FULL_SIZE, CELL_HALF_SIZE } from './constants';
 import { PositionConverter } from './math/position-converter';
+import { RadialMenu } from './ui/radial-menu';
 
 export class SelectionManager {
+    private _menuBuilder: RadialMenu;
+    private _activeMenu: PIXI.Container | null = null;
     private _viewport: Viewport;
     private _app: PIXI.Application;
     private _hoverMarker: PIXI.Sprite;
@@ -18,14 +21,14 @@ export class SelectionManager {
     constructor(app: PIXI.Application, viewport: Viewport) {
         this._app = app;
         this._viewport = viewport;
-        this._selectionMarker = this.setupMarker(CELL_COLOR.SELECTION_FILL, Layers.SelectionCell);
-        this._hoverMarker = this.setupMarker(CELL_COLOR.HOVER_FILL, Layers.HoverCell);
+        this._selectionMarker = this.setupMarker(CELL_COLOR.SELECTION_FILL, Layer.SelectionCell);
+        this._hoverMarker = this.setupMarker(CELL_COLOR.HOVER_FILL, Layer.HoverCell);
         this._positionConverter = new PositionConverter(this._viewport);
+        this._menuBuilder = new RadialMenu();
 
         this._events = {
-            'pointerdown': this.handleAppPointerDown as EventListener,
-            'pointermove': this.handleAppPointerMove as EventListener,
             'pointerup': this.handleAppPointerUp as EventListener,
+            'pointermove': this.handleAppPointerMove as EventListener,
             'pointerout': this.handleAppPointerOut as EventListener,
         };
     }
@@ -70,23 +73,20 @@ export class SelectionManager {
         return marker;
     }
 
-    private handleAppPointerDown = (event: PointerEvent) => {
+    private handleAppPointerUp = (event: PointerEvent) => {
         if (event.button !== 0)
             return;
 
+        console.log(event.target);
+
         if (this._currentCell) {
             if (this._currentCell.isEqual(this._selectedCell) && this._selectionMarker.visible) {
-                this._selectionMarker.visible = false;
+                this.hideMenu();
                 return;
             }
 
             this._selectedCell.copy(this._currentCell);
-            this._selectionMarker.visible = true;
-
-            this._selectionMarker.position.set(
-                this._selectedCell.x * CELL_FULL_SIZE,
-                this._selectedCell.y * CELL_FULL_SIZE
-            );
+            this.showMenu({ x: this._selectedCell.x * CELL_FULL_SIZE, y: this._selectedCell.y * CELL_FULL_SIZE });
         }
     };
 
@@ -98,9 +98,32 @@ export class SelectionManager {
         this._hoverMarker.visible = true;
     };
 
-    private handleAppPointerUp = (_event: PointerEvent) => { };
-
     private handleAppPointerOut = (_event: PointerEvent) => {
         this._hoverMarker.visible = false;
     };
+
+    private showMenu(position: { x: number, y: number }) {
+        this._selectionMarker.visible = true;
+        this._selectionMarker.position.set(position.x, position.y);
+
+        if (this._activeMenu) {
+            this._selectionMarker.removeChild(this._activeMenu);
+            this._activeMenu.destroy();
+            this._activeMenu = null;
+        }
+
+        this._activeMenu = this._menuBuilder.build();
+        this._activeMenu.position.set(this._selectionMarker.width / 2, this._selectionMarker.height / 2);
+        this._selectionMarker.addChild(this._activeMenu);
+    }
+
+    private hideMenu() {
+        this._selectionMarker.visible = false;
+
+        if (this._activeMenu) {
+            this._selectionMarker.removeChild(this._activeMenu);
+            this._activeMenu.destroy();
+            this._activeMenu = null;
+        }
+    }
 }
