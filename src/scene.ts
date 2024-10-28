@@ -145,9 +145,10 @@ export class Scene {
     private setupEvents() {
         window.addEventListener('resize', this.handleWindowResize);
         window.addEventListener('mousedown', this.handleWindowMouseDown);
-        this._app.renderer.canvas.addEventListener('pointerdown', this.handleAppPointerDown);
-        this._app.renderer.canvas.addEventListener('pointermove', this.handleAppPointerMove);
-        this._app.renderer.canvas.addEventListener('pointerup', this.handleAppPointerUp);
+
+        this._viewport.addEventListener('pointerdown', this.handleAppPointerDown);
+        this._viewport.addEventListener('pointermove', this.handleAppPointerMove);
+        this._viewport.addEventListener('pointerup', this.handleAppPointerUp);
     }
 
     public async loadAssets() {
@@ -165,17 +166,18 @@ export class Scene {
                 sprite.anchor.x = 0.5;
                 sprite.anchor.y = 0.5;
                 sprite.zIndex = Layer.Trees;
+                sprite.hitArea = new PIXI.Polygon();
                 this._viewport.addChild(sprite);
                 i++;
             }
         }
     }
 
-    private handleAppPointerDown = (_event: PointerEvent) => { };
+    private handleAppPointerDown = (_event: PIXI.FederatedPointerEvent) => { };
 
-    private handleAppPointerMove = (_event: PointerEvent) => { };
+    private handleAppPointerMove = (_event: PIXI.FederatedPointerEvent) => { };
 
-    private handleAppPointerUp = (_event: PointerEvent) => { };
+    private handleAppPointerUp = (_event: PIXI.FederatedPointerEvent) => { };
 
     private handleWindowResize = () => {
         this._app?.resize();

@@ -16,3 +16,9 @@ export const CELL_COLOR = {
     SELECTION_FILL: 0xb5e48c,
     BORDER: 0xadc178,
 };
+
+// UI - Button.
+export const BUTTON = {
+    HOVER_TINT: 0xCACF85,
+    BACKGROUND_COLOR: 0x2F2F2F,
+};

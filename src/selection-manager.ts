@@ -2,12 +2,11 @@ import * as PIXI from 'pixi.js';
 import { Layer } from './layers';
 import { Vector } from './math/vector';
 import { Viewport } from 'pixi-viewport';
-import { CELL_SIZE, CELL_LINE_WIDTH, CELL_COLOR, CELL_FULL_SIZE, CELL_HALF_SIZE } from './constants';
-import { PositionConverter } from './math/position-converter';
 import { RadialMenu } from './ui/radial-menu';
+import { PositionConverter } from './math/position-converter';
+import { CELL_SIZE, CELL_LINE_WIDTH, CELL_COLOR, CELL_FULL_SIZE } from './constants';
 
 export class SelectionManager {
-    private _menuBuilder: RadialMenu;
     private _activeMenu: PIXI.Container | null = null;
     private _viewport: Viewport;
     private _app: PIXI.Application;
@@ -24,7 +23,6 @@ export class SelectionManager {
         this._selectionMarker = this.setupMarker(CELL_COLOR.SELECTION_FILL, Layer.SelectionCell);
         this._hoverMarker = this.setupMarker(CELL_COLOR.HOVER_FILL, Layer.HoverCell);
         this._positionConverter = new PositionConverter(this._viewport);
-        this._menuBuilder = new RadialMenu();
 
         this._events = {
             'pointerup': this.handleAppPointerUp as EventListener,
@@ -47,12 +45,12 @@ export class SelectionManager {
 
     private addEvents() {
         for (const [eventName, handler] of Object.entries(this._events))
-            this._app.renderer.canvas.addEventListener(eventName, handler);
+            this._viewport.addEventListener(eventName, handler);
     }
 
     private removeEvents() {
         for (const [eventName, handler] of Object.entries(this._events))
-            this._app.renderer.canvas.removeEventListener(eventName, handler);
+            this._viewport.removeEventListener(eventName, handler);
     }
 
     private setupMarker(fillColor: number, layerZIndex: number): PIXI.Sprite {
@@ -76,8 +74,6 @@ export class SelectionManager {
     private handleAppPointerUp = (event: PointerEvent) => {
         if (event.button !== 0)
             return;
-
-        console.log(event.target);
 
         if (this._currentCell) {
             if (this._currentCell.isEqual(this._selectedCell) && this._selectionMarker.visible) {
@@ -112,7 +108,22 @@ export class SelectionManager {
             this._activeMenu = null;
         }
 
-        this._activeMenu = this._menuBuilder.build();
+        this._activeMenu = new RadialMenu([
+            {
+                icon: 'circle-minus',
+                onClick: () => {
+                    console.log('Deleting...');
+                    this.hideMenu();
+                },
+            },
+            { icon: 'circle-plus', onClick: () => { } },
+            { icon: 'map-location-dot', onClick: () => { } },
+            { icon: 'pen', onClick: () => { } },
+            { icon: 'reply', onClick: () => { } },
+            { icon: 'thumbtack-slash', onClick: () => { } },
+            { icon: 'thumbtack', onClick: () => { } }
+        ]);
+
         this._activeMenu.position.set(this._selectionMarker.width / 2, this._selectionMarker.height / 2);
         this._selectionMarker.addChild(this._activeMenu);
     }

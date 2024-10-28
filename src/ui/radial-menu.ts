@@ -1,57 +1,41 @@
 import { Layer } from '../layers';
-import { CELL_FULL_SIZE, CELL_HALF_SIZE } from '../constants';
-import { Graphics, Assets, Container, Texture, Sprite } from 'pixi.js';
 import { Button } from './button';
+import { Container } from 'pixi.js';
+import { CELL_FULL_SIZE } from '../constants';
 
-// // // New cell:
-// // // 1. Create post.
-// // // 3. Copy position.
-
-// // // Existing cell - not owned.
-// // // 1. Reply.
-// // // 2. Share.
-// // // 3. Copy position.
-
-// // // Existing cell - owned.
-// // // 1. Edit.
-// // // 2. Delete.
-// // // 3. Copy position.
-
-type ButtonOptions = {
-    icon: string,
-    radius: number,
-    padding: number,
-    position: { x: number, y: number },
+export type RadialMenuButton = {
+    icon: string;
+    onClick: VoidFunction;
 };
 
-export class RadialMenu {
-    public build(): Container {
-        const items = [
-            { icon: 'circle-minus' },
-            { icon: 'circle-plus' },
-            { icon: 'map-location-dot' },
-            { icon: 'pen' },
-            { icon: 'reply' },
-            { icon: 'thumbtack-slash' },
-            { icon: 'thumbtack' }
-        ];
+export class RadialMenu extends Container {
+    constructor(buttons: RadialMenuButton[]) {
+        super();
+        this.zIndex = Layer.Menu;
+        this._build(buttons);
+    }
 
-        const menu = new Container({ zIndex: Layer.Menu });
+    private _build(buttons: RadialMenuButton[]) {
         const radius = CELL_FULL_SIZE / 2;
         const center = { x: 0, y: 0 };
-        const step = 2 * Math.PI / items.length;
+        const step = 2 * Math.PI / buttons.length;
         const padding = radius * 0.15;
 
-        for (let i = 0; i < items.length; i++) {
+        for (let i = 0; i < buttons.length; i++) {
             const position = {
                 x: center.x + radius * Math.cos(i * step),
                 y: center.y + radius * Math.sin(i * step),
             };
 
-            const button = new Button({ icon: items[i].icon, position, radius, padding });
-            menu.addChild(button);
-        }
+            const button = new Button({
+                radius,
+                padding,
+                position,
+                icon: buttons[i].icon,
+                onClick: buttons[i].onClick,
+            });
 
-        return menu;
+            this.addChild(button);
+        }
     }
 };

@@ -1,20 +1,22 @@
 import { Layer } from '../layers';
+import { BUTTON } from '../constants';
 import { Assets, Graphics, Sprite, Texture } from 'pixi.js';
 
-type ButtonOptions = {
+export type ButtonOptions = {
     icon: string,
     radius: number,
     padding: number,
+    onClick: VoidFunction,
     position: { x: number, y: number },
 };
 
 export class Button extends Graphics {
     constructor(options: ButtonOptions) {
         super();
-        this.build(options);
+        this._build(options);
     }
 
-    private build(options: ButtonOptions) {
+    private _build(options: ButtonOptions) {
         this.zIndex = Layer.MenuBG;
 
         const icon = Assets.get<Texture>([`icon-${options.icon}`]);
@@ -33,7 +35,7 @@ export class Button extends Graphics {
 
         this
             .circle(options.position.x, options.position.y, 15)
-            .fill({ color: 0x2F2F2F, alpha: 0.85 });
+            .fill({ color: BUTTON.BACKGROUND_COLOR, alpha: 0.85 });
 
         this.addChild(iconGraphics);
 
@@ -44,15 +46,19 @@ export class Button extends Graphics {
 
         this.addEventListener('pointerup', (event) => {
             event.stopPropagation();
-            console.log('Pressing', event.target);
+            options.onClick();
         });
 
-        this.addEventListener('pointerenter', (event) => {
-            console.log('On', event.target);
+        this.addEventListener('pointermove', (event) => {
+            event.stopPropagation();
         });
 
-        this.addEventListener('pointerleave', (event) => {
-            console.log('Off', event.target);
+        this.addEventListener('pointerenter', (_event) => {
+            this.tint = BUTTON.HOVER_TINT;
+        });
+
+        this.addEventListener('pointerleave', (_event) => {
+            this.tint = 0xFFFFFF;
         });
     }
 };
