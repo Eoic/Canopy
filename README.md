@@ -1,5 +1,5 @@
 # Rustle
-Create and engage in real-time discussions to grow the infinite virtual forest. While of potentially little practical value, this is an experiment on applying various moderately challenging technical solutions like real-time chat, multiplayer cursors, infinite grid, spatial partitioning (for local network event processing), and so on.
+Create and engage in real-time discussions to grow the infinite virtual forest. While of potentially little practical value, this is an experiment on applying various networking-related solutions such as real-time chat, multiplayer cursors, infinite grid, spatial partitioning (for network event processing in visible area), and so on.
 
 ## Development
 ### Client
