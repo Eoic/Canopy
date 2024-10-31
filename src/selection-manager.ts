@@ -14,6 +14,7 @@ export class SelectionManager {
     private _selectionMarker: PIXI.Sprite;
     private _currentCell: Vector = new Vector();
     private _selectedCell: Vector = new Vector();
+    private _focusedCell: Vector = new Vector();
     private _positionConverter: PositionConverter;
     private readonly _events: Record<string, EventListenerOrEventListenerObject> = {};
 
@@ -25,6 +26,7 @@ export class SelectionManager {
         this._positionConverter = new PositionConverter(this._viewport);
 
         this._events = {
+            'pointerdown': this.handleAppPointerDown as EventListener,
             'pointerup': this.handleAppPointerUp as EventListener,
             'pointermove': this.handleAppPointerMove as EventListener,
             'pointerout': this.handleAppPointerOut as EventListener,
@@ -71,11 +73,18 @@ export class SelectionManager {
         return marker;
     }
 
+    private handleAppPointerDown = (event: PointerEvent) => {
+        if (event.button !== 0)
+            return;
+
+        this._focusedCell.copy(this._currentCell);
+    };
+
     private handleAppPointerUp = (event: PointerEvent) => {
         if (event.button !== 0)
             return;
 
-        if (this._currentCell) {
+        if (this._currentCell && this._currentCell.isEqual(this._focusedCell)) {
             if (this._currentCell.isEqual(this._selectedCell) && this._selectionMarker.visible) {
                 this.hideMenu();
                 return;
@@ -113,7 +122,7 @@ export class SelectionManager {
                 icon: 'circle-minus',
                 onClick: () => {
                     console.log('Deleting...');
-                    this.hideMenu();
+                    // this.hideMenu();
                 },
             },
             { icon: 'circle-plus', onClick: () => { } },

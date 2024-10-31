@@ -51,7 +51,7 @@ export class Scene {
                 autoDensity: true,
                 width: window.innerWidth,
                 height: window.innerHeight,
-                resolution: 1,
+                resolution: 2,
             }).then(() => {
                 container.appendChild(app.canvas);
                 resolve(app);

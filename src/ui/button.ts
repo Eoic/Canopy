@@ -44,8 +44,22 @@ export class Button extends Graphics {
         this.eventMode = 'static';
         this.zIndex = Layer.MenuBG;
 
+        this.addEventListener('pointerdown', (event) => {
+            event.stopPropagation();
+
+            if (event.button !== 0)
+                return;
+
+            this.tint = BUTTON.PRESS_TINT;
+        });
+
         this.addEventListener('pointerup', (event) => {
             event.stopPropagation();
+
+            if (event.button !== 0)
+                return;
+
+            this.tint = BUTTON.HOVER_TINT;
             options.onClick();
         });
 

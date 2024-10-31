@@ -20,5 +20,6 @@ export const CELL_COLOR = {
 // UI - Button.
 export const BUTTON = {
     HOVER_TINT: 0xCACF85,
+    PRESS_TINT: 0xBEB574,
     BACKGROUND_COLOR: 0x2F2F2F,
 };

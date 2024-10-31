@@ -17,14 +17,13 @@ export class RadialMenu extends Container {
 
     private _build(buttons: RadialMenuButton[]) {
         const radius = CELL_FULL_SIZE / 2;
-        const center = { x: 0, y: 0 };
         const step = 2 * Math.PI / buttons.length;
         const padding = radius * 0.15;
 
         for (let i = 0; i < buttons.length; i++) {
             const position = {
-                x: center.x + radius * Math.cos(i * step),
-                y: center.y + radius * Math.sin(i * step),
+                x: radius * Math.cos(i * step),
+                y: radius * Math.sin(i * step),
             };
 
             const button = new Button({
