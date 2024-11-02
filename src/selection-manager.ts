@@ -10,8 +10,8 @@ export class SelectionManager {
     private _activeMenu: PIXI.Container | null = null;
     private _viewport: Viewport;
     private _app: PIXI.Application;
-    private _hoverMarker: PIXI.Sprite;
-    private _selectionMarker: PIXI.Sprite;
+    private _hoverMarker: PIXI.Container;
+    private _selectionMarker: PIXI.Container;
     private _currentCell: Vector = new Vector();
     private _selectedCell: Vector = new Vector();
     private _focusedCell: Vector = new Vector();
@@ -55,8 +55,9 @@ export class SelectionManager {
             this._viewport.removeEventListener(eventName, handler);
     }
 
-    private setupMarker(fillColor: number, layerZIndex: number): PIXI.Sprite {
+    private setupMarker(fillColor: number, layerZIndex: number): PIXI.Container {
         const graphics = new PIXI.Graphics();
+        const container = new PIXI.Container();
 
         graphics
             .rect(0, 0, CELL_SIZE - CELL_LINE_WIDTH, CELL_SIZE - CELL_LINE_WIDTH)
@@ -65,12 +66,14 @@ export class SelectionManager {
         const texture = this._app.renderer.generateTexture(graphics);
         const marker = new PIXI.Sprite(texture);
 
-        marker.pivot.x = marker.texture.width / 2;
-        marker.pivot.y = marker.texture.height / 2;
-        marker.zIndex = layerZIndex;
-        marker.visible = false;
+        container.pivot.x = marker.texture.width / 2;
+        container.pivot.y = marker.texture.height / 2;
+        container.visible = false;
+        container.zIndex = layerZIndex;
+        container.position.set(0, 0);
+        container.addChild(marker);
 
-        return marker;
+        return container;
     }
 
     private handleAppPointerDown = (event: PointerEvent) => {

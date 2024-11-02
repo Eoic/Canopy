@@ -104,11 +104,11 @@ export class Scene {
 
         const texture = this._app.renderer.generateTexture(graphics);
 
-        const background = new PIXI.TilingSprite(
+        const background = new PIXI.TilingSprite({
             texture,
-            this._viewport.worldScreenWidth,
-            this._viewport.worldScreenHeight
-        );
+            width: this._viewport.worldScreenWidth,
+            height: this._viewport.worldScreenHeight,
+        });
 
         background.zIndex = Layer.Ground;
 
