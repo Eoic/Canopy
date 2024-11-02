@@ -1,6 +1,5 @@
 import * as PIXI from 'pixi.js';
 import { Viewport } from 'pixi-viewport';
-
 import {
     CELL_LINE_WIDTH,
     CELL_SIZE,
@@ -10,9 +9,12 @@ import {
     ZOOM,
     CELL_COLOR,
     CELL_FULL_SIZE
-} from './constants';
+} from '../constants';
 import { Layer } from './layers';
 import { SelectionManager } from './selection-manager';
+import { ActionsHandler } from './actions-handler';
+import { Users } from '../repository/users';
+import debounce from 'debounce';
 
 type ViewportEvent = {
     type: string;
@@ -24,18 +26,24 @@ export class Scene {
     private _viewport!: Viewport;
     private _background!: PIXI.TilingSprite;
     private _selectionManager?: SelectionManager;
+    private _actionsHandler?: ActionsHandler;
+    private _users?: Users;
 
-    constructor() {
+    constructor(onReady: VoidFunction) {
         this.setupApp(document.body).then(async (app: PIXI.Application) => {
             this._app = app;
             this._viewport = this.setupViewport(this._app);
             this._background = this.setupBackground();
             this._viewport.addChild(this._background);
+            this._users = new Users();
             this._selectionManager = new SelectionManager(this._app, this._viewport);
-            this._selectionManager.enable();
+            this._actionsHandler = new ActionsHandler(this._users);
             this.setupEvents();
+            this._selectionManager.enable();
+            this._actionsHandler.enable();
 
             await this.loadAssets();
+            onReady();
         }).catch((error) => {
             console.error(error);
         });
@@ -200,5 +208,9 @@ export class Scene {
 
     private handleViewportZoomed = (_event: ViewportEvent) => {
         this.updateBackground(this._background, { isReplaceNeeded: true });
+    };
+
+    private sendPosition = () => {
+
     };
 }

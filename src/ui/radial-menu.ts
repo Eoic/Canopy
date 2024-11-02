@@ -1,4 +1,4 @@
-import { Layer } from '../layers';
+import { Layer } from '../world/layers';
 import { Button } from './button';
 import { Container } from 'pixi.js';
 import { CELL_FULL_SIZE } from '../constants';

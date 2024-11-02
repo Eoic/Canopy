@@ -16,7 +16,7 @@ export default tseslint.config(
             'no-unused-vars': 'off',
             curly: ['error', 'multi-or-nest'],
             quotes: ['error', 'single'],
-            indent: ['error', 4],
+            "indent": ["error", 4, { "SwitchCase": 1 }],
             'max-len': ['error', 120],
             'semi': ['error', 'always'],
             'eol-last': ['error', 'always'],

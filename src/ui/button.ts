@@ -1,4 +1,4 @@
-import { Layer } from '../layers';
+import { Layer } from '../world/layers';
 import { BUTTON } from '../constants';
 import { Assets, Graphics, Sprite, Texture } from 'pixi.js';
 

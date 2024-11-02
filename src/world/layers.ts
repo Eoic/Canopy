@@ -5,5 +5,6 @@ export enum Layer {
     Trees,
     MenuBG,
     MenuFG,
+    Cursor,
     Menu,
 };

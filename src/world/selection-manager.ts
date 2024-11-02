@@ -1,10 +1,10 @@
 import * as PIXI from 'pixi.js';
 import { Layer } from './layers';
-import { Vector } from './math/vector';
+import { Vector } from '../math/vector';
 import { Viewport } from 'pixi-viewport';
-import { RadialMenu } from './ui/radial-menu';
-import { PositionConverter } from './math/position-converter';
-import { CELL_SIZE, CELL_LINE_WIDTH, CELL_COLOR, CELL_FULL_SIZE } from './constants';
+import { RadialMenu } from '../ui/radial-menu';
+import { PositionConverter } from '../math/position-converter';
+import { CELL_SIZE, CELL_LINE_WIDTH, CELL_COLOR, CELL_FULL_SIZE } from '../constants';
 
 export class SelectionManager {
     private _activeMenu: PIXI.Container | null = null;

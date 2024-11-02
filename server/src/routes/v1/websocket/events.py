@@ -8,9 +8,7 @@ router = APIRouter(prefix="/events")
 async def websocket(websocket: WebSocket):
     await WebSocketManager.connect(websocket)
     id = WebSocketManager.id(websocket)
-    await WebSocketManager.broadcast(
-        {"type": "CONNECT", "message": f"Client {id} connected."}
-    )
+    await WebSocketManager.broadcast({"type": "CONNECT", "message": {"id": id}})
 
     try:
         while True:
@@ -23,7 +21,4 @@ async def websocket(websocket: WebSocket):
     except WebSocketDisconnect:
         id = WebSocketManager.id(websocket)
         WebSocketManager.disconnect(websocket)
-
-        await WebSocketManager.broadcast(
-            {"type": "DISCONNECT", "message": f"Client {id} disconnected."}
-        )
+        await WebSocketManager.broadcast({"type": "DISCONNECT", "message": {"id": id}})
