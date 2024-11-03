@@ -18,6 +18,7 @@
     "url": "https://karolis-strazdas.info"
   },
   "dependencies": {
+    "@tweenjs/tween.js": "^25.0.0",
     "alpinejs": "^3.14.3",
     "debounce": "^2.2.0",
     "pixi-viewport": "^5.0.3",

@@ -16,6 +16,7 @@ import { ActionsHandler } from './actions-handler';
 import { Users } from '../repository/users';
 import { PositionConverter } from '../math/position-converter';
 import { Vector } from '../math/vector';
+import { Tween, Easing } from '@tweenjs/tween.js';
 
 type ViewportEvent = {
     type: string;
@@ -30,6 +31,7 @@ export class Scene {
     private _actionsHandler!: ActionsHandler;
     private _positionConverter!: PositionConverter;
     private _users!: Users;
+
 
     get app() {
         return this._app;
@@ -74,6 +76,10 @@ export class Scene {
                     return;
 
                 const screenPos = this._viewport.toScreen(entity.position.x, entity.position.y);
+
+
+
+
                 entity.cursor.position.set(screenPos.x, screenPos.y);
             });
 
@@ -102,6 +108,7 @@ export class Scene {
                 height: window.innerHeight,
                 resolution: 2,
             }).then(() => {
+                app.ticker.maxFPS = 60;
                 container.appendChild(app.canvas);
                 resolve(app);
             }).catch((reason) => {
@@ -194,6 +201,7 @@ export class Scene {
     private setupEvents() {
         window.addEventListener('resize', this.handleWindowResize);
         window.addEventListener('mousedown', this.handleWindowMouseDown);
+        this._app.ticker.add(this.handleUpdate);
         this._viewport.addEventListener('pointermove', this.handleAppPointerMove);
     }
 
@@ -237,6 +245,10 @@ export class Scene {
 
         const worldPosition = this._positionConverter.screenToRawWorld(event);
         this._users.currentUser.position.copy(worldPosition);
+    };
+
+    private handleUpdate = (ticker: PIXI.Ticker) => {
+        // console.log(ticker.deltaTime);
     };
 
     private handleWindowResize = () => {
