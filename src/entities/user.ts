@@ -13,9 +13,14 @@ const cursor = `
 export class User {
     private readonly _id: string;
     private _cursor?: Container;
+    private _position: Vector;
 
     get id() {
         return this._id;
+    }
+
+    get position() {
+        return this._position;
     }
 
     // TODO:
@@ -39,7 +44,9 @@ export class User {
         return this._cursor;
     }
 
-    constructor(id: string) {
+    constructor(id: string, position: Vector) {
         this._id = id;
+        this._position = new Vector();
+        this._position.copy(position);
     }
 };

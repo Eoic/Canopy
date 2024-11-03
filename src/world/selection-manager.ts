@@ -5,25 +5,24 @@ import { Viewport } from 'pixi-viewport';
 import { RadialMenu } from '../ui/radial-menu';
 import { PositionConverter } from '../math/position-converter';
 import { CELL_SIZE, CELL_LINE_WIDTH, CELL_COLOR, CELL_FULL_SIZE } from '../constants';
+import { Scene } from './scene';
 
 export class SelectionManager {
+    private _scene: Scene;
     private _activeMenu: PIXI.Container | null = null;
-    private _viewport: Viewport;
-    private _app: PIXI.Application;
     private _hoverMarker: PIXI.Container;
     private _selectionMarker: PIXI.Container;
     private _currentCell: Vector = new Vector();
     private _selectedCell: Vector = new Vector();
     private _focusedCell: Vector = new Vector();
-    private _positionConverter: PositionConverter;
+    // private _positionConverter: PositionConverter;
     private readonly _events: Record<string, EventListenerOrEventListenerObject> = {};
 
-    constructor(app: PIXI.Application, viewport: Viewport) {
-        this._app = app;
-        this._viewport = viewport;
+    constructor(scene: Scene) {
+        this._scene = scene;
         this._selectionMarker = this.setupMarker(CELL_COLOR.SELECTION_FILL, Layer.SelectionCell);
         this._hoverMarker = this.setupMarker(CELL_COLOR.HOVER_FILL, Layer.HoverCell);
-        this._positionConverter = new PositionConverter(this._viewport);
+        // this._positionConverter = new PositionConverter(this._scene.viewport);
 
         this._events = {
             'pointerdown': this.handleAppPointerDown as EventListener,
@@ -34,25 +33,25 @@ export class SelectionManager {
     }
 
     public enable() {
-        this._viewport.addChild(this._selectionMarker);
-        this._viewport.addChild(this._hoverMarker);
+        this._scene.viewport.addChild(this._selectionMarker);
+        this._scene.viewport.addChild(this._hoverMarker);
         this.addEvents();
     }
 
     public disable() {
-        this._viewport.removeChild(this._selectionMarker);
-        this._viewport.removeChild(this._hoverMarker);
+        this._scene.viewport.removeChild(this._selectionMarker);
+        this._scene.viewport.removeChild(this._hoverMarker);
         this.removeEvents();
     }
 
     private addEvents() {
         for (const [eventName, handler] of Object.entries(this._events))
-            this._viewport.addEventListener(eventName, handler);
+            this._scene.viewport.addEventListener(eventName, handler);
     }
 
     private removeEvents() {
         for (const [eventName, handler] of Object.entries(this._events))
-            this._viewport.removeEventListener(eventName, handler);
+            this._scene.viewport.removeEventListener(eventName, handler);
     }
 
     private setupMarker(fillColor: number, layerZIndex: number): PIXI.Container {
@@ -63,7 +62,7 @@ export class SelectionManager {
             .rect(0, 0, CELL_SIZE - CELL_LINE_WIDTH, CELL_SIZE - CELL_LINE_WIDTH)
             .fill(fillColor);
 
-        const texture = this._app.renderer.generateTexture(graphics);
+        const texture = this._scene.app.renderer.generateTexture(graphics);
         const marker = new PIXI.Sprite(texture);
 
         container.pivot.x = marker.texture.width / 2;
@@ -98,9 +97,12 @@ export class SelectionManager {
         }
     };
 
-    private handleAppPointerMove = (event: PointerEvent) => {
-        const worldPosition = this._positionConverter.worldPosition(event);
-        const cellPosition = this._positionConverter.worldToCell(worldPosition);
+    private handleAppPointerMove = (_event: PointerEvent) => {
+        if (!this._scene.users.currentUser)
+            return;
+
+        const worldPosition = this._scene.users.currentUser.position;
+        const cellPosition = this._scene.worldToCell(worldPosition);
         this._currentCell.set(cellPosition.x, cellPosition.y);
         this._hoverMarker.position.set(worldPosition.x, worldPosition.y);
         this._hoverMarker.visible = true;

@@ -9,25 +9,41 @@ class WebSocketManager:
     connection_ids: Dict[WebSocket, uuid.UUID] = {}
 
     @classmethod
-    def id(self, websocket: WebSocket) -> str:
-        return str(self.connection_ids.get(websocket))
+    def id(cls, websocket: WebSocket) -> str:
+        return str(cls.connection_ids.get(websocket))
 
     @classmethod
-    async def connect(self, websocket: WebSocket):
+    def get_connection_ids(
+        cls, websocket: WebSocket, exclude_self: bool = False
+    ) -> list[uuid.UUID]:
+        ids = list(cls.connection_ids.values())
+
+        if exclude_self:
+            ids = list(filter(lambda id: id != cls.id(websocket), ids))
+
+        return ids
+
+    @classmethod
+    async def connect(cls, websocket: WebSocket):
         await websocket.accept()
-        self.active_connections.append(websocket)
-        self.connection_ids[websocket] = str(uuid.uuid4())
+        cls.active_connections.append(websocket)
+        cls.connection_ids[websocket] = str(uuid.uuid4())
 
     @classmethod
-    def disconnect(self, websocket: WebSocket):
-        self.active_connections.remove(websocket)
-        self.connection_ids.pop(websocket)
+    def disconnect(cls, websocket: WebSocket):
+        cls.active_connections.remove(websocket)
+        cls.connection_ids.pop(websocket)
 
     @classmethod
-    async def send(self, message: str, websocket: WebSocket):
-        await websocket.send_text(message)
+    async def send(cls, websocket: WebSocket, type: str, message: object):
+        await websocket.send_json({"type": type, "message": message})
 
     @classmethod
-    async def broadcast(self, message: object):
-        for connection in self.active_connections:
-            await connection.send_json(message)
+    async def broadcast(
+        cls, sender: WebSocket, type: str, message: object, exclude_self: bool = False
+    ):
+        for connection in cls.active_connections:
+            if exclude_self and sender == connection:
+                continue
+
+            await connection.send_json({"type": type, "message": message})

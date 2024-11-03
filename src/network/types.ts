@@ -21,7 +21,7 @@ export type InMessages = {
     Users: {
         type: InMessageType.Users,
         message: {
-            players: Array<{
+            users: Array<{
                 id: string,
                 position: {
                     x: number,
@@ -34,14 +34,16 @@ export type InMessages = {
     Connect: {
         type: InMessageType.Connect,
         message: {
-            id: string
+            id: string,
+            isAuthor: boolean,
         }
     },
 
     Disconnect: {
         type: InMessageType.Disconnect,
         message: {
-            id: string
+            id: string,
+            isAuthor: boolean,
         }
     },
 

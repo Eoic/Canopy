@@ -1,6 +1,7 @@
 import { Vector } from './vector';
 import { Viewport } from 'pixi-viewport';
 import { CELL_HALF_SIZE, CELL_FULL_SIZE } from '../constants';
+import { FederatedPointerEvent } from 'pixi.js';
 
 export class VectorPool {
     private _pool: Vector[] = [];
@@ -26,7 +27,7 @@ export class PositionConverter {
         this._vectorPool = new VectorPool();
     }
 
-    public worldPosition(event: PointerEvent): Vector {
+    public worldPosition(event: FederatedPointerEvent): Vector {
         const worldPosition = this._viewport.toWorld({ x: event.clientX, y: event.clientY });
 
         return this._vectorPool.get(

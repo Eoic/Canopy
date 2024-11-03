@@ -2,6 +2,7 @@ import { InMessages, InMessageType, InWebSocketMessage } from '../network/types'
 import { ConnectionManager } from '../network/connection-manager';
 import { Users } from '../repository/users';
 import { User } from '../entities/user';
+import { Vector } from '../math/vector';
 
 export class ActionsHandler {
     private _users: Users;
@@ -49,12 +50,14 @@ export class ActionsHandler {
     };
 
     private _handleConnect = (data: InMessages['Connect']['message']) => {
-        console.log('Connected', data);
-        this._users.addEntity(new User(data.id));
+        const user = new User(data.id, new Vector(0, 0));
+        this._users.addEntity(user);
+
+        if (data.isAuthor)
+            this._users.currentUser = user;
     };
 
     private _handleDisconnect = (data: InMessages['Disconnect']['message']) => {
-        console.log('Disconnected', data);
         this._users.removeEntity(data.id);
     };
 
@@ -63,6 +66,11 @@ export class ActionsHandler {
     };
 
     private _handleUsers = (data: InMessages['Users']['message']) => {
-        console.log('Users', data);
+        data.users.forEach((userData) => {
+            const user = new User(userData.id, new Vector(userData.position.x, userData.position.y));
+            this._users.addEntity(user);
+        });
+
+        console.log(data);
     };
 };

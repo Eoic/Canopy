@@ -14,7 +14,8 @@ import { Layer } from './layers';
 import { SelectionManager } from './selection-manager';
 import { ActionsHandler } from './actions-handler';
 import { Users } from '../repository/users';
-import debounce from 'debounce';
+import { PositionConverter } from '../math/position-converter';
+import { Vector } from '../math/vector';
 
 type ViewportEvent = {
     type: string;
@@ -25,9 +26,22 @@ export class Scene {
     private _app!: PIXI.Application;
     private _viewport!: Viewport;
     private _background!: PIXI.TilingSprite;
-    private _selectionManager?: SelectionManager;
-    private _actionsHandler?: ActionsHandler;
-    private _users?: Users;
+    private _selectionManager!: SelectionManager;
+    private _actionsHandler!: ActionsHandler;
+    private _positionConverter!: PositionConverter;
+    private _users!: Users;
+
+    get app() {
+        return this._app;
+    }
+
+    get viewport() {
+        return this._viewport;
+    }
+
+    get users() {
+        return this._users;
+    }
 
     constructor(onReady: VoidFunction) {
         this.setupApp(document.body).then(async (app: PIXI.Application) => {
@@ -36,8 +50,9 @@ export class Scene {
             this._background = this.setupBackground();
             this._viewport.addChild(this._background);
             this._users = new Users();
-            this._selectionManager = new SelectionManager(this._app, this._viewport);
+            this._selectionManager = new SelectionManager(this);
             this._actionsHandler = new ActionsHandler(this._users);
+            this._positionConverter = new PositionConverter(this._viewport);
             this.setupEvents();
             this._selectionManager.enable();
             this._actionsHandler.enable();
@@ -153,10 +168,7 @@ export class Scene {
     private setupEvents() {
         window.addEventListener('resize', this.handleWindowResize);
         window.addEventListener('mousedown', this.handleWindowMouseDown);
-
-        this._viewport.addEventListener('pointerdown', this.handleAppPointerDown);
         this._viewport.addEventListener('pointermove', this.handleAppPointerMove);
-        this._viewport.addEventListener('pointerup', this.handleAppPointerUp);
     }
 
     public async loadAssets() {
@@ -181,11 +193,22 @@ export class Scene {
         }
     }
 
-    private handleAppPointerDown = (_event: PIXI.FederatedPointerEvent) => { };
+    public worldToCell(position: Vector): Vector {
+        return this._positionConverter.worldToCell(position);
+    }
 
-    private handleAppPointerMove = (_event: PIXI.FederatedPointerEvent) => { };
+    public cellToWorld(position: Vector): Vector {
+        return this._positionConverter.cellToWorld(position);
+    }
 
-    private handleAppPointerUp = (_event: PIXI.FederatedPointerEvent) => { };
+    private handleAppPointerMove = (event: PIXI.FederatedPointerEvent) => {
+        const worldPosition = this._positionConverter.worldPosition(event);
+
+        if (!this._users.currentUser)
+            return;
+
+        this._users.currentUser.position.copy(worldPosition);
+    };
 
     private handleWindowResize = () => {
         this._app?.resize();
@@ -208,9 +231,5 @@ export class Scene {
 
     private handleViewportZoomed = (_event: ViewportEvent) => {
         this.updateBackground(this._background, { isReplaceNeeded: true });
-    };
-
-    private sendPosition = () => {
-
     };
 }
