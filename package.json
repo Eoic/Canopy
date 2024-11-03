@@ -4,7 +4,9 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "client": "vite",
+    "server": "cd server && . ./.venv/bin/activate && ./run.sh",
+    "dev": "concurrently \"npm:client\" \"npm:server\"",
     "build": "tsc && vite build",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
@@ -27,6 +29,7 @@
     "@types/alpinejs": "^3.13.10",
     "@types/eslint__js": "^8.42.3",
     "@types/throttle-debounce": "^5.0.2",
+    "concurrently": "^9.0.1",
     "eslint": "^8.57.0",
     "sass": "^1.69.5",
     "serve": "^14.2.3",
