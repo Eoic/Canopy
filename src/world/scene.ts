@@ -58,6 +58,32 @@ export class Scene {
             this._actionsHandler.enable();
 
             await this.loadAssets();
+
+            this._users.onAdd((entity) => {
+                if (this._users.isCurrentUser(entity.id))
+                    return;
+
+                this._app.stage.addChild(entity.cursor);
+            });
+
+            this._users.onUpdate((entity, keys) => {
+                if (this._users.isCurrentUser(entity.id))
+                    return;
+
+                if (!keys.includes('position'))
+                    return;
+
+                const screenPos = this._viewport.toScreen(entity.position.x, entity.position.y);
+                entity.cursor.position.set(screenPos.x, screenPos.y);
+            });
+
+            this._users.onRemove((entity) => {
+                if (this._users.isCurrentUser(entity.id))
+                    return;
+
+                this._app.stage.removeChild(entity.cursor);
+            });
+
             onReady();
         }).catch((error) => {
             console.error(error);
@@ -193,20 +219,23 @@ export class Scene {
         }
     }
 
-    public worldToCell(position: Vector): Vector {
-        return this._positionConverter.worldToCell(position);
+    public rawWorldToSnappedWorld(position: Vector): Vector {
+        return this._positionConverter.rawWorldToSnappedWorld(position);
     }
 
-    public cellToWorld(position: Vector): Vector {
-        return this._positionConverter.cellToWorld(position);
+    public rawWorldToCellIndex(position: Vector): Vector {
+        return this._positionConverter.rawWorldToCellIndex(position);
+    }
+
+    public cellIndexToSnappedWorld(position: Vector): Vector {
+        return this._positionConverter.cellIndexToSnappedWorld(position);
     }
 
     private handleAppPointerMove = (event: PIXI.FederatedPointerEvent) => {
-        const worldPosition = this._positionConverter.worldPosition(event);
-
         if (!this._users.currentUser)
             return;
 
+        const worldPosition = this._positionConverter.screenToRawWorld(event);
         this._users.currentUser.position.copy(worldPosition);
     };
 

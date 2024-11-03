@@ -27,23 +27,35 @@ export class PositionConverter {
         this._vectorPool = new VectorPool();
     }
 
-    public worldPosition(event: FederatedPointerEvent): Vector {
-        const worldPosition = this._viewport.toWorld({ x: event.clientX, y: event.clientY });
+    public screenToRawWorld(event: FederatedPointerEvent): Vector {
+        return this._viewport.toWorld({ x: event.clientX, y: event.clientY });
+    }
 
+    public screenToSnappedWorld(event: FederatedPointerEvent): Vector {
+        const worldPosition = this._viewport.toWorld({ x: event.clientX, y: event.clientY });
+        return this.rawWorldToSnappedWorld(this._vectorPool.get(worldPosition.x, worldPosition.y));
+    }
+
+    public rawWorldToSnappedWorld(position: Vector): Vector {
         return this._vectorPool.get(
-            Math.floor((worldPosition.x + CELL_HALF_SIZE) / CELL_FULL_SIZE) * CELL_FULL_SIZE,
-            Math.floor((worldPosition.y + CELL_HALF_SIZE) / CELL_FULL_SIZE) * CELL_FULL_SIZE
+            Math.floor((position.x + CELL_HALF_SIZE) / CELL_FULL_SIZE) * CELL_FULL_SIZE,
+            Math.floor((position.y + CELL_HALF_SIZE) / CELL_FULL_SIZE) * CELL_FULL_SIZE
         );
     }
 
-    public worldToCell(worldPosition: Vector): Vector {
+    public rawWorldToCellIndex(position: Vector): Vector {
+        const snappedPosition = this.rawWorldToSnappedWorld(position);
+        return this.snappedWorldToCellIndex(snappedPosition);
+    }
+
+    public snappedWorldToCellIndex(worldPosition: Vector): Vector {
         return this._vectorPool.get(
             worldPosition.x / CELL_FULL_SIZE,
             worldPosition.y / CELL_FULL_SIZE
         );
     }
 
-    public cellToWorld(cellPosition: Vector): Vector {
+    public cellIndexToSnappedWorld(cellPosition: Vector): Vector {
         return this._vectorPool.get(
             cellPosition.x * CELL_FULL_SIZE,
             cellPosition.y * CELL_FULL_SIZE

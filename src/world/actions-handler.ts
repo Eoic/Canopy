@@ -38,8 +38,8 @@ export class ActionsHandler {
             case InMessageType.Disconnect:
                 this._handleDisconnect(data.message);
                 break;
-            case InMessageType.PointerPosition:
-                this._handlePointerPosition(data.message);
+            case InMessageType.PointerPositions:
+                this._handlePointerPositions(data.message);
                 break;
             case InMessageType.Users:
                 this._handleUsers(data.message);
@@ -49,28 +49,33 @@ export class ActionsHandler {
         }
     };
 
-    private _handleConnect = (data: InMessages['Connect']['message']) => {
+    private _handleConnect = (data: InMessages[InMessageType.Connect]['message']) => {
         const user = new User(data.id, new Vector(0, 0));
-        this._users.addEntity(user);
 
+        // TODO: Probably quite bad.
         if (data.isAuthor)
             this._users.currentUser = user;
+
+        this._users.addEntity(user);
     };
 
-    private _handleDisconnect = (data: InMessages['Disconnect']['message']) => {
+    private _handleDisconnect = (data: InMessages[InMessageType.Disconnect]['message']) => {
         this._users.removeEntity(data.id);
     };
 
-    private _handlePointerPosition = (data: InMessages['PointerPosition']['message']) => {
-        console.log('Pointer at', data);
+    private _handlePointerPositions = (data: InMessages[InMessageType.PointerPositions]['message']) => {
+        data.positions.forEach((entity) => {
+            this._users.updateEntity(
+                entity.id,
+                { position: new Vector().setComplex(entity.position) }
+            );
+        });
     };
 
-    private _handleUsers = (data: InMessages['Users']['message']) => {
+    private _handleUsers = (data: InMessages[InMessageType.Users]['message']) => {
         data.users.forEach((userData) => {
             const user = new User(userData.id, new Vector(userData.position.x, userData.position.y));
             this._users.addEntity(user);
         });
-
-        console.log(data);
     };
 };

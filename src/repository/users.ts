@@ -1,7 +1,7 @@
-import { User } from '../entities/user';
-import { Registry, WithId } from './registry';
+import { Registry } from './registry';
+import { User, UserData } from '../entities/user';
 
-export class Users extends Registry<User> {
+export class Users extends Registry<User, UserData> {
     private _currentUser?: User;
 
     get currentUser(): User | undefined {
@@ -12,11 +12,7 @@ export class Users extends Registry<User> {
         this._currentUser = user;
     }
 
-    public addEntity(entity: WithId<User>): void {
-        super.addEntity(entity);
-    }
-
-    public removeEntity(id: string): void {
-        super.removeEntity(id);
+    public isCurrentUser(id: string): boolean {
+        return (this._currentUser?.id === id);
     }
 };

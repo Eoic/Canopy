@@ -1,11 +1,12 @@
 import * as PIXI from 'pixi.js';
 import { Layer } from './layers';
 import { Vector } from '../math/vector';
-import { Viewport } from 'pixi-viewport';
 import { RadialMenu } from '../ui/radial-menu';
-import { PositionConverter } from '../math/position-converter';
-import { CELL_SIZE, CELL_LINE_WIDTH, CELL_COLOR, CELL_FULL_SIZE } from '../constants';
+import { CELL_SIZE, CELL_LINE_WIDTH, CELL_COLOR, CELL_FULL_SIZE, POSITION_UPDATE_THROTTLE_MS } from '../constants';
 import { Scene } from './scene';
+import { ConnectionManager } from '../network/connection-manager';
+import { OutMessageType } from '../network/types';
+import { throttle } from 'throttle-debounce';
 
 export class SelectionManager {
     private _scene: Scene;
@@ -15,46 +16,45 @@ export class SelectionManager {
     private _currentCell: Vector = new Vector();
     private _selectedCell: Vector = new Vector();
     private _focusedCell: Vector = new Vector();
-    // private _positionConverter: PositionConverter;
     private readonly _events: Record<string, EventListenerOrEventListenerObject> = {};
 
     constructor(scene: Scene) {
         this._scene = scene;
-        this._selectionMarker = this.setupMarker(CELL_COLOR.SELECTION_FILL, Layer.SelectionCell);
-        this._hoverMarker = this.setupMarker(CELL_COLOR.HOVER_FILL, Layer.HoverCell);
-        // this._positionConverter = new PositionConverter(this._scene.viewport);
+        this._selectionMarker = this._setupMarker(CELL_COLOR.SELECTION_FILL, Layer.SelectionCell);
+        this._hoverMarker = this._setupMarker(CELL_COLOR.HOVER_FILL, Layer.HoverCell);
+        this._sendPosition = throttle(POSITION_UPDATE_THROTTLE_MS, this._sendPosition);
 
         this._events = {
-            'pointerdown': this.handleAppPointerDown as EventListener,
-            'pointerup': this.handleAppPointerUp as EventListener,
-            'pointermove': this.handleAppPointerMove as EventListener,
-            'pointerout': this.handleAppPointerOut as EventListener,
+            'pointerdown': this._handleAppPointerDown as EventListener,
+            'pointerup': this._handleAppPointerUp as EventListener,
+            'pointermove': this._handleAppPointerMove as EventListener,
+            'pointerout': this._handleAppPointerOut as EventListener,
         };
     }
 
     public enable() {
         this._scene.viewport.addChild(this._selectionMarker);
         this._scene.viewport.addChild(this._hoverMarker);
-        this.addEvents();
+        this._addEvents();
     }
 
     public disable() {
         this._scene.viewport.removeChild(this._selectionMarker);
         this._scene.viewport.removeChild(this._hoverMarker);
-        this.removeEvents();
+        this._removeEvents();
     }
 
-    private addEvents() {
+    private _addEvents() {
         for (const [eventName, handler] of Object.entries(this._events))
             this._scene.viewport.addEventListener(eventName, handler);
     }
 
-    private removeEvents() {
+    private _removeEvents() {
         for (const [eventName, handler] of Object.entries(this._events))
             this._scene.viewport.removeEventListener(eventName, handler);
     }
 
-    private setupMarker(fillColor: number, layerZIndex: number): PIXI.Container {
+    private _setupMarker(fillColor: number, layerZIndex: number): PIXI.Container {
         const graphics = new PIXI.Graphics();
         const container = new PIXI.Container();
 
@@ -75,44 +75,45 @@ export class SelectionManager {
         return container;
     }
 
-    private handleAppPointerDown = (event: PointerEvent) => {
+    private _handleAppPointerDown = (event: PointerEvent) => {
         if (event.button !== 0)
             return;
 
         this._focusedCell.copy(this._currentCell);
     };
 
-    private handleAppPointerUp = (event: PointerEvent) => {
+    private _handleAppPointerUp = (event: PointerEvent) => {
         if (event.button !== 0)
             return;
 
         if (this._currentCell && this._currentCell.isEqual(this._focusedCell)) {
             if (this._currentCell.isEqual(this._selectedCell) && this._selectionMarker.visible) {
-                this.hideMenu();
+                this._hideMenu();
                 return;
             }
 
             this._selectedCell.copy(this._currentCell);
-            this.showMenu({ x: this._selectedCell.x * CELL_FULL_SIZE, y: this._selectedCell.y * CELL_FULL_SIZE });
+            this._showMenu({ x: this._selectedCell.x * CELL_FULL_SIZE, y: this._selectedCell.y * CELL_FULL_SIZE });
         }
     };
 
-    private handleAppPointerMove = (_event: PointerEvent) => {
+    private _handleAppPointerMove = (_event: PointerEvent) => {
         if (!this._scene.users.currentUser)
             return;
 
-        const worldPosition = this._scene.users.currentUser.position;
-        const cellPosition = this._scene.worldToCell(worldPosition);
+        const worldPosition = this._scene.rawWorldToSnappedWorld(this._scene.users.currentUser.position);
+        const cellPosition = this._scene.rawWorldToCellIndex(worldPosition);
         this._currentCell.set(cellPosition.x, cellPosition.y);
         this._hoverMarker.position.set(worldPosition.x, worldPosition.y);
         this._hoverMarker.visible = true;
+        this._sendPosition(this._scene.users.currentUser.position);
     };
 
-    private handleAppPointerOut = (_event: PointerEvent) => {
+    private _handleAppPointerOut = (_event: PointerEvent) => {
         this._hoverMarker.visible = false;
     };
 
-    private showMenu(position: { x: number, y: number }) {
+    private _showMenu(position: { x: number, y: number }) {
         this._selectionMarker.visible = true;
         this._selectionMarker.position.set(position.x, position.y);
 
@@ -142,7 +143,7 @@ export class SelectionManager {
         this._selectionMarker.addChild(this._activeMenu);
     }
 
-    private hideMenu() {
+    private _hideMenu() {
         this._selectionMarker.visible = false;
 
         if (this._activeMenu) {
@@ -151,4 +152,15 @@ export class SelectionManager {
             this._activeMenu = null;
         }
     }
+
+    private _sendPosition = (position: Vector) => {
+        ConnectionManager.instance.send({
+            type: OutMessageType.PointerPosition,
+            message: {
+                id: this._scene.users.currentUser!.id,
+                position: { x: position.x, y: position.y },
+            },
+        });
+    };
 }
+

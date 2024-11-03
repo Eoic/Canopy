@@ -10,23 +10,28 @@ const cursor = `
   </cursorMask>
 </svg>`;
 
+export type UserData = {
+    cursor: Container;
+    position: Vector;
+};
+
 export class User {
     private readonly _id: string;
-    private _cursor?: Container;
-    private _position: Vector;
+    private _data: UserData;
+    // private _data.cursor?: Container;
+    // private _position: Vector;
 
     get id() {
         return this._id;
     }
 
     get position() {
-        return this._position;
+        return this._data.position;
     }
 
     // TODO:
     // * Add outline / border.
     get cursor() {
-        this._cursor = new Container();
         const cursorSprite = new Sprite(Texture.WHITE);
         const cursorMask = new Graphics().svg(cursor);
 
@@ -36,17 +41,30 @@ export class User {
         cursorSprite.width = cursorMask.width;
         cursorSprite.height = cursorMask.height;
 
-        this._cursor.addChild(cursorMask);
-        this._cursor.addChild(cursorSprite);
-        this._cursor.zIndex = Layer.Cursor;
-        this._cursor.scale.set(0.075, 0.075);
+        this._data.cursor.addChild(cursorMask);
+        this._data.cursor.addChild(cursorSprite);
+        this._data.cursor.zIndex = Layer.Cursor;
+        this._data.cursor.scale.set(0.075, 0.075);
 
-        return this._cursor;
+        return this._data.cursor;
     }
 
     constructor(id: string, position: Vector) {
         this._id = id;
-        this._position = new Vector();
-        this._position.copy(position);
+        this._data = {
+            position: new Vector().copy(position),
+            cursor: new Container(),
+        };
+    }
+
+    public update(data: Partial<UserData>): string[] {
+        const updatedKeys: string[] = [];
+
+        for (const [key, value] of Object.entries(data)) {
+            this._data[key] = value;
+            updatedKeys.push(key);
+        }
+
+        return updatedKeys;
     }
 };

@@ -23,3 +23,6 @@ export const BUTTON = {
     PRESS_TINT: 0xBEB574,
     BACKGROUND_COLOR: 0x2F2F2F,
 };
+
+// Network.
+export const POSITION_UPDATE_THROTTLE_MS = 200;

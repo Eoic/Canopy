@@ -1,4 +1,4 @@
-import { InWebSocketMessage } from './types';
+import { InWebSocketMessage, OutMessages, OutMessageType } from './types';
 
 type Callbacks = {
     open?: Array<VoidFunction>;
@@ -107,7 +107,7 @@ export class ConnectionManager {
         this._callbacks[event].splice(index, 1);
     }
 
-    public send(data: Record<string, unknown> & Record<'type', string>) {
+    public send<T extends OutMessageType>(data: OutMessages[T]) {
         if (!this.isConnected)
             throw new Error('Cannot send a message because we are not connected.');
 
