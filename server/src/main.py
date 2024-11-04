@@ -9,7 +9,7 @@ from routes.v1 import router as router_v1
 
 async def update_positions(user_store: UserStore):
     while True:
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(0.05)
 
         connections = WebSocketManager.connection_ids
 

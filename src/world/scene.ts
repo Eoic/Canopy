@@ -31,7 +31,7 @@ export class Scene {
     private _actionsHandler!: ActionsHandler;
     private _positionConverter!: PositionConverter;
     private _users!: Users;
-
+    private _tween!: Tween;
 
     get app() {
         return this._app;
@@ -61,6 +61,23 @@ export class Scene {
 
             await this.loadAssets();
 
+            // const x = { x: 100 };
+
+            // this._tween = new Tween(x)
+            //     .to({ x: 200 }, 5000)
+            //     .easing(Easing.Linear.InOut)
+            //     .onUpdate((obj) => {
+            //         console.log(obj.x);
+            //     })
+            //     .start();
+
+            // setTimeout(() => {
+            //     console.log('new tween', x);
+            //     this._tween.stop().to({ x: -300 }).startFromCurrentValues();
+            // }, 3000);
+
+            // this._tween.chain(new Tween({ x: 200 }).to({ x: 250 })).start();
+
             this._users.onAdd((entity) => {
                 if (this._users.isCurrentUser(entity.id))
                     return;
@@ -75,12 +92,24 @@ export class Scene {
                 if (!keys.includes('position'))
                     return;
 
-                const screenPos = this._viewport.toScreen(entity.position.x, entity.position.y);
+                // const screenPos = this._viewport.toScreen(entity.position.x, entity.position.y);
 
+                if (!this._tween) {
+                    this._tween = new Tween({ x: entity.position.x, y: entity.position.y })
+                        .onUpdate((position) => {
+                            const screenPos = this._viewport.toScreen(position.x, position.y);
+                            entity.cursor.position.set(screenPos.x, screenPos.y);
+                        });
+                    return;
+                }
 
+                if (this._tween.isPlaying())
+                    this._tween.stop();
 
-
-                entity.cursor.position.set(screenPos.x, screenPos.y);
+                this._tween
+                    .to({ x: entity.position.x, y: entity.position.y }, 100)
+                    .easing(Easing.Circular.InOut)
+                    .startFromCurrentValues();
             });
 
             this._users.onRemove((entity) => {
@@ -90,6 +119,7 @@ export class Scene {
                 this._app.stage.removeChild(entity.cursor);
             });
 
+            this._app.ticker.start();
             onReady();
         }).catch((error) => {
             console.error(error);
@@ -201,6 +231,7 @@ export class Scene {
     private setupEvents() {
         window.addEventListener('resize', this.handleWindowResize);
         window.addEventListener('mousedown', this.handleWindowMouseDown);
+        this._app.ticker.autoStart = false;
         this._app.ticker.add(this.handleUpdate);
         this._viewport.addEventListener('pointermove', this.handleAppPointerMove);
     }
@@ -248,7 +279,10 @@ export class Scene {
     };
 
     private handleUpdate = (ticker: PIXI.Ticker) => {
-        // console.log(ticker.deltaTime);
+        if (!this._tween)
+            return;
+
+        this._tween.update();
     };
 
     private handleWindowResize = () => {
