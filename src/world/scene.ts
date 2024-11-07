@@ -16,7 +16,6 @@ import { ActionsHandler } from './actions-handler';
 import { Users } from '../repository/users';
 import { PositionConverter } from '../math/position-converter';
 import { Vector } from '../math/vector';
-import { Tween, Easing } from '@tweenjs/tween.js';
 
 type ViewportEvent = {
     type: string;
@@ -31,7 +30,6 @@ export class Scene {
     private _actionsHandler!: ActionsHandler;
     private _positionConverter!: PositionConverter;
     private _users!: Users;
-    private _tween!: Tween;
 
     get app() {
         return this._app;
@@ -53,7 +51,7 @@ export class Scene {
             this._viewport.addChild(this._background);
             this._users = new Users();
             this._selectionManager = new SelectionManager(this);
-            this._actionsHandler = new ActionsHandler(this._users);
+            this._actionsHandler = new ActionsHandler(this._users, this._viewport);
             this._positionConverter = new PositionConverter(this._viewport);
             this.setupEvents();
             this._selectionManager.enable();
@@ -61,55 +59,11 @@ export class Scene {
 
             await this.loadAssets();
 
-            // const x = { x: 100 };
-
-            // this._tween = new Tween(x)
-            //     .to({ x: 200 }, 5000)
-            //     .easing(Easing.Linear.InOut)
-            //     .onUpdate((obj) => {
-            //         console.log(obj.x);
-            //     })
-            //     .start();
-
-            // setTimeout(() => {
-            //     console.log('new tween', x);
-            //     this._tween.stop().to({ x: -300 }).startFromCurrentValues();
-            // }, 3000);
-
-            // this._tween.chain(new Tween({ x: 200 }).to({ x: 250 })).start();
-
             this._users.onAdd((entity) => {
                 if (this._users.isCurrentUser(entity.id))
                     return;
 
                 this._app.stage.addChild(entity.cursor);
-            });
-
-            this._users.onUpdate((entity, keys) => {
-                if (this._users.isCurrentUser(entity.id))
-                    return;
-
-                if (!keys.includes('position'))
-                    return;
-
-                // const screenPos = this._viewport.toScreen(entity.position.x, entity.position.y);
-
-                if (!this._tween) {
-                    this._tween = new Tween({ x: entity.position.x, y: entity.position.y })
-                        .onUpdate((position) => {
-                            const screenPos = this._viewport.toScreen(position.x, position.y);
-                            entity.cursor.position.set(screenPos.x, screenPos.y);
-                        });
-                    return;
-                }
-
-                if (this._tween.isPlaying())
-                    this._tween.stop();
-
-                this._tween
-                    .to({ x: entity.position.x, y: entity.position.y }, 100)
-                    .easing(Easing.Circular.InOut)
-                    .startFromCurrentValues();
             });
 
             this._users.onRemove((entity) => {
@@ -275,14 +229,13 @@ export class Scene {
             return;
 
         const worldPosition = this._positionConverter.screenToRawWorld(event);
-        this._users.currentUser.position.copy(worldPosition);
+        this._users.currentUser.worldPosition.copy(worldPosition);
+        // TODO: Should also update screen position, but there is no need for it for the current user.
     };
 
     private handleUpdate = (ticker: PIXI.Ticker) => {
-        if (!this._tween)
-            return;
-
-        this._tween.update();
+        for (const user of this._users.entities.values())
+            user.update(ticker.deltaMS);
     };
 
     private handleWindowResize = () => {

@@ -1,4 +1,4 @@
 export interface Entity<T> {
     readonly id: string;
-    update(data: Partial<T>): string[];
+    setData(data: Partial<T>): string[];
 };

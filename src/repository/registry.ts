@@ -10,6 +10,10 @@ export class Registry<T extends Entity<U>, U> {
     protected _onRemoveCallback?: OnRemoveCallback<T>;
     protected _onUpdateCallback?: OnUpdateCallback<T>;
 
+    public get entities(): Map<string, T> {
+        return this._entities;
+    }
+
     public addEntity(entity: T): void {
         this._entities.set(entity.id, entity);
         this._onAddCallback?.(entity);
@@ -33,7 +37,7 @@ export class Registry<T extends Entity<U>, U> {
         if (!entity)
             throw new Error(`Cannot update entity - it does not exist: ${id}.`);
 
-        const updatedKeys = entity.update(entityData);
+        const updatedKeys = entity.setData(entityData);
         this._onUpdateCallback?.(entity, updatedKeys);
     }
 

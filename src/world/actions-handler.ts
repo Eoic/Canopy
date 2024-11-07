@@ -3,13 +3,16 @@ import { ConnectionManager } from '../network/connection-manager';
 import { Users } from '../repository/users';
 import { User } from '../entities/user';
 import { Vector } from '../math/vector';
+import { Viewport } from 'pixi-viewport';
 
 export class ActionsHandler {
     private _users: Users;
+    private _viewport: Viewport;
     private _isEnabled: boolean = false;
 
-    constructor(users: Users) {
+    constructor(users: Users, viewport: Viewport) {
         this._users = users;
+        this._viewport = viewport;
     }
 
     public enable() {
@@ -50,9 +53,9 @@ export class ActionsHandler {
     };
 
     private _handleConnect = (data: InMessages[InMessageType.Connect]['message']) => {
-        const user = new User(data.id, new Vector(0, 0));
+        const user = new User(data.id, new Vector(0, 0), new Vector(0, 0));
 
-        // TODO: Probably quite bad.
+        // TODO: Not great.
         if (data.isAuthor)
             this._users.currentUser = user;
 
@@ -65,16 +68,28 @@ export class ActionsHandler {
 
     private _handlePointerPositions = (data: InMessages[InMessageType.PointerPositions]['message']) => {
         data.positions.forEach((entity) => {
+            const screenPosition = this._viewport.toScreen(entity.position.x, entity.position.y);
+
             this._users.updateEntity(
                 entity.id,
-                { position: new Vector().setComplex(entity.position) }
+                {
+                    worldPosition: new Vector().set(entity.position.x, entity.position.y),
+                    screenPosition: new Vector().set(screenPosition.x, screenPosition.y),
+                }
             );
         });
     };
 
     private _handleUsers = (data: InMessages[InMessageType.Users]['message']) => {
         data.users.forEach((userData) => {
-            const user = new User(userData.id, new Vector(userData.position.x, userData.position.y));
+            const screenPosition = this._viewport.toScreen(userData.position.x, userData.position.y);
+
+            const user = new User(
+                userData.id,
+                new Vector(userData.position.x, userData.position.y),
+                new Vector().set(screenPosition.x, screenPosition.y)
+            );
+
             this._users.addEntity(user);
         });
     };

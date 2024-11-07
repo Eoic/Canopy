@@ -1,6 +1,7 @@
 import { Container, Graphics, Sprite, Texture } from 'pixi.js';
 import { Vector } from '../math/vector';
 import { Layer } from '../world/layers';
+import { Tween, Easing, Interpolation } from '@tweenjs/tween.js';
 
 const cursor = `
 <svg version="1.1" viewBox="0 0 191.77 241.02" xmlns="http://www.w3.org/2000/svg">
@@ -10,23 +11,41 @@ const cursor = `
   </cursorMask>
 </svg>`;
 
+
+const easeInQuad = (time: number) => {
+    return time * (2 - time);
+};
+
+const lerp = (start: number, end: number, time: number) => {
+    return start + (end - start) * time;
+};
+
 export type UserData = {
     cursor: Container;
-    position: Vector;
+    worldPosition: Vector;
+    screenPosition: Vector;
+    elapsedTime: number;
 };
+
+const UPDATE_INTERVAL_MS = 100;
 
 export class User {
     private readonly _id: string;
     private _data: UserData;
-    // private _data.cursor?: Container;
-    // private _position: Vector;
+    private _fromPos: { x: number, y: number } = {};
+    private _toPos: { x: number, y: number } = {};
+    private _tween: Tween;
 
     get id() {
         return this._id;
     }
 
-    get position() {
-        return this._data.position;
+    get worldPosition() {
+        return this._data.worldPosition;
+    }
+
+    get screenPosition() {
+        return this._data.screenPosition;
     }
 
     // TODO:
@@ -44,20 +63,51 @@ export class User {
         this._data.cursor.addChild(cursorMask);
         this._data.cursor.addChild(cursorSprite);
         this._data.cursor.zIndex = Layer.Cursor;
-        this._data.cursor.scale.set(0.075, 0.075);
+        this._data.cursor.scale.set(0.05, 0.05);
 
         return this._data.cursor;
     }
 
-    constructor(id: string, position: Vector) {
+    constructor(id: string, worldPosition: Vector, screenPosition: Vector) {
         this._id = id;
         this._data = {
-            position: new Vector().copy(position),
+            elapsedTime: 0,
             cursor: new Container(),
+            worldPosition: new Vector().copy(worldPosition),
+            screenPosition: new Vector().copy(screenPosition),
         };
+
+        this._fromPos.x = screenPosition.x;
+        this._fromPos.y = screenPosition.y;
+        this._toPos.x = screenPosition.x;
+        this._toPos.y = screenPosition.y;
+
+        this._tween = new Tween(this._fromPos);
     }
 
-    public update(data: Partial<UserData>): string[] {
+    public update(deltaMs: number) {
+        this._tween.update();
+        this._data.elapsedTime += deltaMs;
+
+        if (this._data.elapsedTime >= UPDATE_INTERVAL_MS) {
+            this._data.elapsedTime = 0;
+            this._fromPos.x = this._data.cursor.position.x;
+            this._fromPos.y = this._data.cursor.position.y;
+            this._toPos.x = this.screenPosition.x;
+            this._toPos.y = this.screenPosition.y;
+
+            this._tween = new Tween(this._fromPos)
+                .to(this._toPos, UPDATE_INTERVAL_MS)
+                .interpolation(Interpolation.Bezier)
+                .onUpdate((position) => {
+                    this._data.cursor.position.x = position.x;
+                    this._data.cursor.position.y = position.y;
+                })
+                .start();
+        }
+    }
+
+    public setData(data: Partial<UserData>): string[] {
         const updatedKeys: string[] = [];
 
         for (const [key, value] of Object.entries(data)) {

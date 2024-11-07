@@ -101,12 +101,12 @@ export class SelectionManager {
         if (!this._scene.users.currentUser)
             return;
 
-        const worldPosition = this._scene.rawWorldToSnappedWorld(this._scene.users.currentUser.position);
+        const worldPosition = this._scene.rawWorldToSnappedWorld(this._scene.users.currentUser.worldPosition);
         const cellPosition = this._scene.rawWorldToCellIndex(worldPosition);
         this._currentCell.set(cellPosition.x, cellPosition.y);
         this._hoverMarker.position.set(worldPosition.x, worldPosition.y);
         this._hoverMarker.visible = true;
-        this._sendPosition(this._scene.users.currentUser.position);
+        this._sendPosition(this._scene.users.currentUser.worldPosition);
     };
 
     private _handleAppPointerOut = (_event: PointerEvent) => {

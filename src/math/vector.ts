@@ -30,13 +30,6 @@ export class Vector {
         return this;
     }
 
-    public setComplex(value: { x: number, y: number }) {
-        this.x = value.x;
-        this.y = value.y;
-
-        return this;
-    }
-
     public copy(other: Vector): Vector {
         this.x = other.x;
         this.y = other.y;
