@@ -53,7 +53,7 @@ export class ActionsHandler {
     };
 
     private _handleConnect = (data: InMessages[InMessageType.Connect]['message']) => {
-        const user = new User(data.id, new Vector(0, 0), new Vector(0, 0));
+        const user = new User(data.id, new Vector(0, 0));
 
         // TODO: Not great.
         if (data.isAuthor)
@@ -68,28 +68,13 @@ export class ActionsHandler {
 
     private _handlePointerPositions = (data: InMessages[InMessageType.PointerPositions]['message']) => {
         data.positions.forEach((entity) => {
-            const screenPosition = this._viewport.toScreen(entity.position.x, entity.position.y);
-
-            this._users.updateEntity(
-                entity.id,
-                {
-                    worldPosition: new Vector().set(entity.position.x, entity.position.y),
-                    screenPosition: new Vector().set(screenPosition.x, screenPosition.y),
-                }
-            );
+            this._users.updateEntity(entity.id, { position: new Vector().set(entity.position.x, entity.position.y) });
         });
     };
 
     private _handleUsers = (data: InMessages[InMessageType.Users]['message']) => {
         data.users.forEach((userData) => {
-            const screenPosition = this._viewport.toScreen(userData.position.x, userData.position.y);
-
-            const user = new User(
-                userData.id,
-                new Vector(userData.position.x, userData.position.y),
-                new Vector().set(screenPosition.x, screenPosition.y)
-            );
-
+            const user = new User(userData.id, new Vector(userData.position.x, userData.position.y));
             this._users.addEntity(user);
         });
     };
