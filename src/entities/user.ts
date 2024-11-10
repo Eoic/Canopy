@@ -1,6 +1,7 @@
 import { Assets, Container, Graphics, ObservablePoint, Sprite, Text, TextStyle, Texture } from 'pixi.js';
 import { Layer } from '../world/layers';
 import { Tween, Interpolation } from '@tweenjs/tween.js';
+import { getUserColor } from '../utils/user-utils';
 
 export type UserData = {
     cursor: Container;
@@ -46,8 +47,9 @@ export class User {
 
     constructor(id: string, position: { x: number, y: number }) {
         this._id = id;
+
         this._data = {
-            cursor: this._createCursor(),
+            cursor: this._createCursor(id, id),
             positionsBuffer: [position],
             fromPosition: { ...position },
             toPosition: { ...position },
@@ -94,21 +96,22 @@ export class User {
         return updatedKeys;
     }
 
-    private _createCursor() {
+    private _createCursor(id: string, name: string) {
         const cursorTexture = Assets.get<Texture>(['cursor']);
 
         if (!cursorTexture)
             throw new Error('Could not load cursor.');
 
-        const container = new Container();
+        const color = getUserColor(id);
+        const cursorContainer = new Container();
         const cursor = new Graphics(cursorTexture['0']);
-        const name = this._createNameTag(this.id, 0xDC143C, cursor);
-        cursor.tint = 0xDC143C;
-        container.addChild(name);
-        container.addChild(cursor);
-        container.zIndex = Layer.Cursor;
+        const nameContainer = this._createNameTag(name, color, cursor);
+        cursor.tint = color;
+        cursorContainer.addChild(nameContainer);
+        cursorContainer.addChild(cursor);
+        cursorContainer.zIndex = Layer.Cursor;
 
-        return container;
+        return cursorContainer;
     }
 
     private _createNameTag(text: string, color: number, cursor: Graphics): Container {
