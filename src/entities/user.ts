@@ -61,13 +61,18 @@ export class User {
         this._name!.resolution = scale._x;
 
         if (this._isTweenDone && this._data.positionsBuffer.length > 0) {
-            this._isTweenDone = false;
             this._fromPosition.x = this._data.cursor.position.x;
             this._fromPosition.y = this._data.cursor.position.y;
 
             const toPosition = this._data.positionsBuffer.shift()!;
             this._toPosition.x = toPosition.x;
             this._toPosition.y = toPosition.y;
+
+            if (Math.abs(this._fromPosition.x - this._toPosition.x) < Number.EPSILON &&
+                Math.abs(this._fromPosition.y - this._toPosition.y) < Number.EPSILON)
+                return;
+
+            this._isTweenDone = false;
 
             this._tween = new Tween(this._fromPosition)
                 .to(this._toPosition, UPDATE_INTERVAL_MS * 0.85)
