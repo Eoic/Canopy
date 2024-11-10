@@ -63,14 +63,14 @@ export class Scene {
                 if (this._users.isCurrentUser(entity.id))
                     return;
 
-                this._app.stage.addChild(entity.cursor);
+                this.viewport.addChild(entity.cursor);
             });
 
             this._users.onRemove((entity) => {
                 if (this._users.isCurrentUser(entity.id))
                     return;
 
-                this._app.stage.removeChild(entity.cursor);
+                this.viewport.removeChild(entity.cursor);
             });
 
             this._app.ticker.start();
@@ -228,9 +228,7 @@ export class Scene {
         if (!this._users.currentUser)
             return;
 
-        const worldPosition = this._positionConverter.screenToRawWorld(event);
-        this._users.currentUser.worldPosition.copy(worldPosition);
-        // TODO: Should also update screen position, but there is no need for it for the current user.
+        this._users.currentUser.position.copy(this._positionConverter.screenToRawWorld(event));
     };
 
     private handleUpdate = (ticker: PIXI.Ticker) => {

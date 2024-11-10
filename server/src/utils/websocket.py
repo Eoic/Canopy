@@ -1,6 +1,6 @@
 import uuid
-
 from typing import Dict
+
 from fastapi import WebSocket
 
 
@@ -46,4 +46,7 @@ class WebSocketManager:
             if exclude_self and sender == connection:
                 continue
 
-            await connection.send_json({"type": type, "message": message})
+            try:
+                await connection.send_json({"type": type, "message": message})
+            except Exception as e:
+                print("Failed to send", e)
