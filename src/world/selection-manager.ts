@@ -153,12 +153,12 @@ export class SelectionManager {
         }
     }
 
-    private _sendPosition = (position: Vector) => {
+    private _sendPosition = (position: { x: number, y: number }) => {
         ConnectionManager.instance.send({
             type: OutMessageType.PointerPosition,
             message: {
                 id: this._scene.users.currentUser!.id,
-                position: { x: position.x, y: position.y },
+                position: { ...position },
             },
         });
     };

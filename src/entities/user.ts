@@ -1,7 +1,7 @@
 import { Container, Graphics, Sprite, Texture } from 'pixi.js';
 import { Vector } from '../math/vector';
 import { Layer } from '../world/layers';
-import { Tween, Interpolation } from '@tweenjs/tween.js';
+import { Tween, Interpolation, Easing } from '@tweenjs/tween.js';
 
 const cursor = `
 <svg version="1.1" viewBox="0 0 191.77 241.02" xmlns="http://www.w3.org/2000/svg">
@@ -13,25 +13,39 @@ const cursor = `
 
 export type UserData = {
     cursor: Container;
-    position: Vector;
-    elapsedTime: number;
+    positionsBuffer: { x: number, y: number }[];
+    fromPosition: { x: number, y: number };
+    toPosition: { x: number, y: number };
 };
 
 const UPDATE_INTERVAL_MS = 100;
 
 export class User {
     private readonly _id: string;
-    private _data: UserData;
-    private _fromPos: { x: number, y: number } = { x: 0, y: 0 };
-    private _toPos: { x: number, y: number } = { x: 0, y: 0 };
     private _tween: Tween;
+    private _data: UserData;
+    private _isTweenDone: boolean = true;
+    private _fromPosition: { x: number, y: number } = { x: 0, y: 0 };
+    private _toPosition: { x: number, y: number } = { x: 0, y: 0 };
 
     get id() {
         return this._id;
     }
 
     get position() {
-        return this._data.position;
+        return {
+            x: this._data.cursor.position.x,
+            y: this._data.cursor.position.y,
+        };
+    }
+
+    set position(value: { x: number, y: number }) {
+        this._data.cursor.position.x = value.x;
+        this._data.cursor.position.y = value.y;
+    }
+
+    get positionsBuffer() {
+        return this._data.positionsBuffer;
     }
 
     // TODO:
@@ -54,40 +68,35 @@ export class User {
         return this._data.cursor;
     }
 
-    constructor(id: string, position: Vector) {
+    constructor(id: string, position: { x: number, y: number }) {
         this._id = id;
         this._data = {
-            elapsedTime: 0,
             cursor: new Container(),
-            position: new Vector().copy(position),
+            positionsBuffer: [position],
+            fromPosition: { ...position },
+            toPosition: { ...position },
         };
 
-        this._fromPos.x = position.x;
-        this._fromPos.y = position.y;
-        this._toPos.x = position.x;
-        this._toPos.y = position.y;
-
-        this._tween = new Tween(this._fromPos);
+        this._tween = new Tween(this._fromPosition);
     }
 
-    public update(deltaMs: number) {
+    public update(_deltaMs: number) {
         this._tween.update();
-        this._data.elapsedTime += deltaMs;
 
-        if (this._data.elapsedTime >= UPDATE_INTERVAL_MS) {
-            this._data.elapsedTime = 0;
-            this._fromPos.x = this._data.cursor.position.x;
-            this._fromPos.y = this._data.cursor.position.y;
-            this._toPos.x = this.position.x;
-            this._toPos.y = this.position.y;
+        if (this._isTweenDone && this._data.positionsBuffer.length > 0) {
+            this._isTweenDone = false;
+            this._fromPosition.x = this._data.cursor.position.x;
+            this._fromPosition.y = this._data.cursor.position.y;
 
-            this._tween = new Tween(this._fromPos)
-                .to(this._toPos, UPDATE_INTERVAL_MS)
+            const toPosition = this._data.positionsBuffer.shift()!;
+            this._toPosition.x = toPosition.x;
+            this._toPosition.y = toPosition.y;
+
+            this._tween = new Tween(this._fromPosition)
+                .to(this._toPosition, UPDATE_INTERVAL_MS * 0.85)
                 .interpolation(Interpolation.Linear)
-                .onUpdate((position) => {
-                    this._data.cursor.position.x = position.x;
-                    this._data.cursor.position.y = position.y;
-                })
+                .onUpdate((position) => this.position = position)
+                .onComplete((_position) => this._isTweenDone = true)
                 .start();
         }
     }

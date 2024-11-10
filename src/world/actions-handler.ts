@@ -68,7 +68,18 @@ export class ActionsHandler {
 
     private _handlePointerPositions = (data: InMessages[InMessageType.PointerPositions]['message']) => {
         data.positions.forEach((entity) => {
-            this._users.updateEntity(entity.id, { position: new Vector().set(entity.position.x, entity.position.y) });
+            const position = new Vector(entity.position.x, entity.position.y);
+            const user = this._users.getEntity(entity.id);
+
+            if (user?.id === this._users.currentUser?.id)
+                return;
+
+            if (user) {
+                this._users.updateEntity(
+                    entity.id,
+                    { positionsBuffer: [position, ...user.positionsBuffer] }
+                );
+            }
         });
     };
 

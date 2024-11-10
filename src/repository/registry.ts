@@ -19,6 +19,10 @@ export class Registry<T extends Entity<U>, U> {
         this._onAddCallback?.(entity);
     };
 
+    public getEntity(id: string): T | undefined {
+        return this._entities.get(id);
+    }
+
     public removeEntity(id: string): void {
         const entity = this._entities.get(id);
 

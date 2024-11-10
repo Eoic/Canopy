@@ -212,11 +212,11 @@ export class Scene {
         }
     }
 
-    public rawWorldToSnappedWorld(position: Vector): Vector {
+    public rawWorldToSnappedWorld(position: { x: number, y: number }): { x: number, y: number } {
         return this._positionConverter.rawWorldToSnappedWorld(position);
     }
 
-    public rawWorldToCellIndex(position: Vector): Vector {
+    public rawWorldToCellIndex(position: { x: number, y: number }): { x: number, y: number } {
         return this._positionConverter.rawWorldToCellIndex(position);
     }
 
@@ -228,7 +228,8 @@ export class Scene {
         if (!this._users.currentUser)
             return;
 
-        this._users.currentUser.position.copy(this._positionConverter.screenToRawWorld(event));
+        const position = this._positionConverter.screenToRawWorld(event);
+        this._users.currentUser.position = { x: position.x, y: position.y };
     };
 
     private handleUpdate = (ticker: PIXI.Ticker) => {
