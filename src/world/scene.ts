@@ -16,6 +16,7 @@ import { ActionsHandler } from './actions-handler';
 import { Users } from '../repository/users';
 import { PositionConverter } from '../math/position-converter';
 import { Vector } from '../math/vector';
+import { UI } from '../ui/ui';
 
 type ViewportEvent = {
     type: string;
@@ -30,6 +31,7 @@ export class Scene {
     private _actionsHandler!: ActionsHandler;
     private _positionConverter!: PositionConverter;
     private _users!: Users;
+    private _ui!: UI;
 
     get app() {
         return this._app;
@@ -50,12 +52,14 @@ export class Scene {
             this._background = this.setupBackground();
             this._viewport.addChild(this._background);
             this._users = new Users();
+            this._ui = new UI(this);
             this._selectionManager = new SelectionManager(this);
             this._actionsHandler = new ActionsHandler(this._users, this._viewport);
             this._positionConverter = new PositionConverter(this._viewport);
             this.setupEvents();
             this._selectionManager.enable();
             this._actionsHandler.enable();
+            this._ui.enable();
 
             await this.loadAssets();
 
@@ -222,6 +226,21 @@ export class Scene {
 
     public cellIndexToSnappedWorld(position: Vector): Vector {
         return this._positionConverter.cellIndexToSnappedWorld(position);
+    }
+
+    public moveToCell(cellPosition: { x: number, y: number }) {
+        this._viewport.moveCenter(cellPosition.x * CELL_FULL_SIZE, cellPosition.y * CELL_HALF_SIZE);
+        this.updateBackground(this._background);
+    }
+
+    public zoomIn() {
+        this._viewport.zoom(-100, true);
+        this.updateBackground(this._background, { isReplaceNeeded: true });
+    }
+
+    public zoomOut() {
+        this._viewport.zoom(100, true);
+        this.updateBackground(this._background, { isReplaceNeeded: true });
     }
 
     private handleAppPointerMove = (event: PIXI.FederatedPointerEvent) => {

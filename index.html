@@ -6,10 +6,29 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rustle</title>
+  <title> Rustle </title>
 </head>
 
 <body>
+  <div class="ui">
+    <div class="ui-content">
+      <div class="toolbar bottom left vertical">
+        <button data-action="home" class="btn">
+          <span class="icon home"></span>
+        </button>
+        <button data-action="zoom-in" class="btn">
+          <span class="icon plus"></span>
+        </button>
+        <button data-action="zoom-out" class="btn">
+          <span class="icon minus"></span>
+        </button>
+      </div>
+
+      <div class="toolbar top center position">
+        <p id="position">(X: 0, Y: 0)</p>
+      </div>
+    </div>
+  </div>
   <script type="module" src="/src/main.ts"></script>
 </body>
 

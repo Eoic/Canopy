@@ -1,7 +1,6 @@
 import { Container, Graphics, Sprite, Texture } from 'pixi.js';
-import { Vector } from '../math/vector';
 import { Layer } from '../world/layers';
-import { Tween, Interpolation, Easing } from '@tweenjs/tween.js';
+import { Tween, Interpolation } from '@tweenjs/tween.js';
 
 const cursor = `
 <svg version="1.1" viewBox="0 0 191.77 241.02" xmlns="http://www.w3.org/2000/svg">

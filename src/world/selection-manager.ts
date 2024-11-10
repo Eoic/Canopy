@@ -16,6 +16,7 @@ export class SelectionManager {
     private _currentCell: Vector = new Vector();
     private _selectedCell: Vector = new Vector();
     private _focusedCell: Vector = new Vector();
+    private _positionText: HTMLParagraphElement;
     private readonly _events: Record<string, EventListenerOrEventListenerObject> = {};
 
     constructor(scene: Scene) {
@@ -23,6 +24,7 @@ export class SelectionManager {
         this._selectionMarker = this._setupMarker(CELL_COLOR.SELECTION_FILL, Layer.SelectionCell);
         this._hoverMarker = this._setupMarker(CELL_COLOR.HOVER_FILL, Layer.HoverCell);
         this._sendPosition = throttle(POSITION_UPDATE_THROTTLE_MS, this._sendPosition);
+        this._positionText = document.getElementById('position') as HTMLParagraphElement;
 
         this._events = {
             'pointerdown': this._handleAppPointerDown as EventListener,
@@ -107,6 +109,7 @@ export class SelectionManager {
         this._hoverMarker.position.set(worldPosition.x, worldPosition.y);
         this._hoverMarker.visible = true;
         this._sendPosition(this._scene.users.currentUser.position);
+        this._positionText.innerText = `(X: ${cellPosition.x}, Y: ${cellPosition.y})`;
     };
 
     private _handleAppPointerOut = (_event: PointerEvent) => {
@@ -163,4 +166,3 @@ export class SelectionManager {
         });
     };
 }
-
