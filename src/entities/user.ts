@@ -1,14 +1,6 @@
-import { Container, Graphics, Sprite, Texture } from 'pixi.js';
+import { Assets, Container, Graphics, ObservablePoint, Sprite, Text, TextStyle, Texture } from 'pixi.js';
 import { Layer } from '../world/layers';
 import { Tween, Interpolation } from '@tweenjs/tween.js';
-
-const cursor = `
-<svg version="1.1" viewBox="0 0 191.77 241.02" xmlns="http://www.w3.org/2000/svg">
-  <cursorMask transform="translate(.085323 .2732)" fill="#000">
-    <path
-      d="m92 166-34 47c-4 7-14 5-15-3l-43-199c-1-8 7-14 13-10l174 105c7 4 6 14-2 16l-57 17 52 70c3 4 2 9-1 12l-25 18c-4 3-9 2-12-2z" />
-  </cursorMask>
-</svg>`;
 
 export type UserData = {
     cursor: Container;
@@ -26,6 +18,7 @@ export class User {
     private _isTweenDone: boolean = true;
     private _fromPosition: { x: number, y: number } = { x: 0, y: 0 };
     private _toPosition: { x: number, y: number } = { x: 0, y: 0 };
+    private _name?: Text;
 
     get id() {
         return this._id;
@@ -47,30 +40,14 @@ export class User {
         return this._data.positionsBuffer;
     }
 
-    // TODO:
-    // * Add outline / border.
     get cursor() {
-        const cursorSprite = new Sprite(Texture.WHITE);
-        const cursorMask = new Graphics().svg(cursor);
-
-        cursorSprite.mask = cursorMask;
-        cursorSprite.position.set(0, 0);
-        cursorSprite.tint = 0x231651;
-        cursorSprite.width = cursorMask.width;
-        cursorSprite.height = cursorMask.height;
-
-        this._data.cursor.addChild(cursorMask);
-        this._data.cursor.addChild(cursorSprite);
-        this._data.cursor.zIndex = Layer.Cursor;
-        this._data.cursor.scale.set(0.05, 0.05);
-
         return this._data.cursor;
     }
 
     constructor(id: string, position: { x: number, y: number }) {
         this._id = id;
         this._data = {
-            cursor: new Container(),
+            cursor: this._createCursor(),
             positionsBuffer: [position],
             fromPosition: { ...position },
             toPosition: { ...position },
@@ -79,8 +56,9 @@ export class User {
         this._tween = new Tween(this._fromPosition);
     }
 
-    public update(_deltaMs: number) {
+    public update(_deltaMs: number, scale: ObservablePoint) {
         this._tween.update();
+        this._name!.resolution = scale._x;
 
         if (this._isTweenDone && this._data.positionsBuffer.length > 0) {
             this._isTweenDone = false;
@@ -109,5 +87,40 @@ export class User {
         }
 
         return updatedKeys;
+    }
+
+    private _createCursor() {
+        const cursorTexture = Assets.get<Texture>(['cursor']);
+
+        if (!cursorTexture)
+            throw new Error('Could not load cursor.');
+
+        const container = new Container();
+        const cursor = new Graphics(cursorTexture['0']);
+        const name = this._createNameTag(this.id, 0xDC143C, cursor);
+        cursor.tint = 0xDC143C;
+        container.addChild(name);
+        container.addChild(cursor);
+        container.zIndex = Layer.Cursor;
+
+        return container;
+    }
+
+    private _createNameTag(text: string, color: number, cursor: Graphics): Container {
+        const name = new Container();
+        const style = new TextStyle({ fill: 0xFFFFFF, fontSize: 11, letterSpacing: 1 });
+        const nameText = new Text({ text, style, anchor: { x: 0.5, y: 0.5 } });
+
+        const nameRect = new Graphics()
+            .roundRect(0, 0, nameText.width + 10, nameText.height + 5, 3)
+            .fill(color);
+
+        name.addChild(nameRect);
+        name.addChild(nameText);
+        name.pivot.set(-cursor.width / 2, -cursor.height);
+        nameText.pivot.set(-nameRect.width / 2, -nameRect.height / 2);
+        this._name = nameText;
+
+        return name;
     }
 };

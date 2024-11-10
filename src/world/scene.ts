@@ -191,12 +191,14 @@ export class Scene {
         window.addEventListener('mousedown', this.handleWindowMouseDown);
         this._app.ticker.autoStart = false;
         this._app.ticker.add(this.handleUpdate);
-        this._viewport.addEventListener('pointermove', this.handleAppPointerMove);
+        this._viewport.addEventListener('pointermove', this.handlePointerMove);
     }
 
     public async loadAssets() {
         await PIXI.Assets.init({ manifest: 'assets/manifest.json' });
         await PIXI.Assets.loadBundle(['tree-one', 'icons']);
+        PIXI.Assets.setPreferences({ parseAsGraphicsContext: true });
+        await PIXI.Assets.loadBundle(['misc']);
 
         const trees = PIXI.Assets.get<PIXI.Texture>(['tree-small-one', 'tree-medium-one', 'tree-large-one']);
 
@@ -243,8 +245,11 @@ export class Scene {
         this.updateBackground(this._background, { isReplaceNeeded: true });
     }
 
-    private handleAppPointerMove = (event: PIXI.FederatedPointerEvent) => {
+    private handlePointerMove = (event: PIXI.FederatedPointerEvent) => {
         if (!this._users.currentUser)
+            return;
+
+        if (event.nativeEvent.target !== this._app.canvas)
             return;
 
         const position = this._positionConverter.screenToRawWorld(event);
@@ -253,7 +258,7 @@ export class Scene {
 
     private handleUpdate = (ticker: PIXI.Ticker) => {
         for (const user of this._users.entities.values())
-            user.update(ticker.deltaMS);
+            user.update(ticker.deltaMS, this._viewport.scale);
     };
 
     private handleWindowResize = () => {

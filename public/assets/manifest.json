@@ -1,55 +1,63 @@
 {
-    "bundles":[
-       {
-          "name":"tree-one",
-          "assets":[
-             {
-                "alias":"tree-small-one",
-                "src":"assets/trees/one/small.png"
-             },
-             {
-                "alias":"tree-medium-one",
-                "src":"assets/trees/one/medium.png"
-             },
-             {
-                "alias":"tree-large-one",
-                "src":"assets/trees/one/large.png"
-             }
-          ]
-       },
-       {
-         "name":"icons",
-         "assets":[
+   "bundles": [
+      {
+         "name": "tree-one",
+         "assets": [
             {
-               "alias":"icon-circle-minus",
-               "src":"assets/icons/png/circle-minus.png"
+               "alias": "tree-small-one",
+               "src": "assets/trees/one/small.png"
             },
             {
-               "alias":"icon-circle-plus",
-               "src":"assets/icons/png/circle-plus.png"
+               "alias": "tree-medium-one",
+               "src": "assets/trees/one/medium.png"
             },
             {
-               "alias":"icon-map-location-dot",
-               "src":"assets/icons/png/map-location-dot.png"
+               "alias": "tree-large-one",
+               "src": "assets/trees/one/large.png"
+            }
+         ]
+      },
+      {
+         "name": "icons",
+         "assets": [
+            {
+               "alias": "icon-circle-minus",
+               "src": "assets/icons/png/circle-minus.png"
             },
             {
-               "alias":"icon-pen",
-               "src":"assets/icons/png/pen.png"
+               "alias": "icon-circle-plus",
+               "src": "assets/icons/png/circle-plus.png"
             },
             {
-               "alias":"icon-reply",
-               "src":"assets/icons/png/reply.png"
+               "alias": "icon-map-location-dot",
+               "src": "assets/icons/png/map-location-dot.png"
             },
             {
-               "alias":"icon-thumbtack-slash",
-               "src":"assets/icons/png/thumbtack-slash.png"
+               "alias": "icon-pen",
+               "src": "assets/icons/png/pen.png"
             },
             {
-               "alias":"icon-thumbtack",
-               "src":"assets/icons/png/thumbtack.png"
+               "alias": "icon-reply",
+               "src": "assets/icons/png/reply.png"
+            },
+            {
+               "alias": "icon-thumbtack-slash",
+               "src": "assets/icons/png/thumbtack-slash.png"
+            },
+            {
+               "alias": "icon-thumbtack",
+               "src": "assets/icons/png/thumbtack.png"
+            }
+         ]
+      },
+      {
+         "name": "misc",
+         "assets": [
+            {
+               "alias": "cursor",
+               "src": "assets/misc/cursor.svg"
             }
          ]
       }
-    ]
- }
- 
+   ]
+}

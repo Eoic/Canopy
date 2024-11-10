@@ -1,12 +1,12 @@
 import * as PIXI from 'pixi.js';
+import { Scene } from './scene';
 import { Layer } from './layers';
 import { Vector } from '../math/vector';
-import { RadialMenu } from '../ui/radial-menu';
-import { CELL_SIZE, CELL_LINE_WIDTH, CELL_COLOR, CELL_FULL_SIZE, POSITION_UPDATE_THROTTLE_MS } from '../constants';
-import { Scene } from './scene';
-import { ConnectionManager } from '../network/connection-manager';
-import { OutMessageType } from '../network/types';
 import { throttle } from 'throttle-debounce';
+import { RadialMenu } from '../ui/radial-menu';
+import { OutMessageType } from '../network/types';
+import { ConnectionManager } from '../network/connection-manager';
+import { CELL_SIZE, CELL_LINE_WIDTH, CELL_COLOR, CELL_FULL_SIZE, POSITION_UPDATE_THROTTLE_MS } from '../constants';
 
 export class SelectionManager {
     private _scene: Scene;

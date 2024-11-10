@@ -1,6 +1,6 @@
-import { Layer } from '../world/layers';
 import { BUTTON } from '../constants';
-import { Assets, Graphics, Sprite, Texture } from 'pixi.js';
+import { Layer } from '../world/layers';
+import { Assets, FederatedPointerEvent, Graphics, Sprite, Texture } from 'pixi.js';
 
 export type ButtonOptions = {
     icon: string,
@@ -11,8 +11,11 @@ export type ButtonOptions = {
 };
 
 export class Button extends Graphics {
+    private _options: ButtonOptions;
+
     constructor(options: ButtonOptions) {
         super();
+        this._options = options;
         this._build(options);
     }
 
@@ -44,35 +47,41 @@ export class Button extends Graphics {
         this.eventMode = 'static';
         this.zIndex = Layer.MenuBG;
 
-        this.addEventListener('pointerdown', (event) => {
-            event.stopPropagation();
-
-            if (event.button !== 0)
-                return;
-
-            this.tint = BUTTON.PRESS_TINT;
-        });
-
-        this.addEventListener('pointerup', (event) => {
-            event.stopPropagation();
-
-            if (event.button !== 0)
-                return;
-
-            this.tint = BUTTON.HOVER_TINT;
-            options.onClick();
-        });
-
-        this.addEventListener('pointermove', (event) => {
-            event.stopPropagation();
-        });
-
-        this.addEventListener('pointerenter', (_event) => {
-            this.tint = BUTTON.HOVER_TINT;
-        });
-
-        this.addEventListener('pointerleave', (_event) => {
-            this.tint = 0xFFFFFF;
-        });
+        this.addEventListener('pointerup', this._handlePointerUp);
+        this.addEventListener('pointerdown', this._handlePointerDown);
+        this.addEventListener('pointermove', this._handlePointerMove);
+        this.addEventListener('pointerenter', this._handlePointerEnter);
+        this.addEventListener('pointerleave', this._handlePointerLeave);
     }
+
+    private _handlePointerMove = (event: FederatedPointerEvent) => {
+        event.stopPropagation();
+    };
+
+    private _handlePointerEnter = (_event: FederatedPointerEvent) => {
+        this.tint = BUTTON.HOVER_TINT;
+    };
+
+    private _handlePointerLeave = (_event: FederatedPointerEvent) => {
+        this.tint = 0xFFFFFF;
+    };
+
+    private _handlePointerDown = (event: FederatedPointerEvent) => {
+        event.stopPropagation();
+
+        if (event.button !== 0)
+            return;
+
+        this.tint = BUTTON.PRESS_TINT;
+    };
+
+    private _handlePointerUp = (event: FederatedPointerEvent) => {
+        event.stopPropagation();
+
+        if (event.button !== 0)
+            return;
+
+        this.tint = BUTTON.HOVER_TINT;
+        this._options.onClick();
+    };
 };
