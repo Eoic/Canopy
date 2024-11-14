@@ -43,7 +43,7 @@ async def websocket(websocket: WebSocket):
 
             if data["type"] == "POINTER_POSITION":
                 id = data["message"]["id"]
-                await user_store.update_user_position(id, data["message"]["position"])
+                await user_store.record_user_position(id, data["message"]["position"])
     except WebSocketDisconnect:
         id = WebSocketManager.id(websocket)
         WebSocketManager.disconnect(websocket)

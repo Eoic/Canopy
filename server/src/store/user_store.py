@@ -8,9 +8,16 @@ from dataclasses import dataclass, field, asdict
 class UserData:
     id: str
     position: Dict[str, float] = field(default_factory=lambda: {"x": 0.0, "y": 0.0})
+    positions_buffer: list[Dict[str, float]] = field(default_factory=list)
 
     def as_dict(self):
         return asdict(self)
+
+    def pop_position(self) -> Union[Dict[str, float], None]:
+        try:
+            return self.positions_buffer.pop(0)
+        except IndexError:
+            return None
 
 
 class UserStore:
@@ -32,10 +39,12 @@ class UserStore:
         async with self._lock:
             return self.users.get(id)
 
-    async def update_user_position(self, id: str, position: Dict[str, float]):
+    async def record_user_position(self, id: str, position: Dict[str, float]):
         async with self._lock:
             if id in self.users:
-                self.users[id].position = position
+                self.users[id].positions_buffer.append(position)
+                # Update after sending.
+                # self.users[id].position = position
 
     async def get_all_users(self) -> Dict[id, UserData]:
         return self.users

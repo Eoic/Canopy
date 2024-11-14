@@ -77,7 +77,7 @@ export class ActionsHandler {
             if (user) {
                 this._users.updateEntity(
                     entity.id,
-                    { positionsBuffer: [position, ...user.positionsBuffer] }
+                    { positionsBuffer: [...user.positionsBuffer, position] }
                 );
             }
         });

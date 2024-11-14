@@ -77,8 +77,8 @@ export class User {
             this._isTweenDone = false;
 
             this._tween = new Tween(this._fromPosition)
-                .to(this._toPosition, UPDATE_INTERVAL_MS * 0.85)
-                .interpolation(Interpolation.Linear)
+                .to(this._toPosition, UPDATE_INTERVAL_MS * 0.75)
+                .interpolation(Interpolation.Bezier)
                 .onUpdate((position) => this.position = position)
                 .onComplete((_position) => this._isTweenDone = true)
                 .start();
