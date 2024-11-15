@@ -1,34 +1,30 @@
 import asyncio
-from fastapi import FastAPI
-from store.user_store import UserData, UserStore
 from contextlib import asynccontextmanager
-from utils.websocket import WebSocketManager
+
 from database.database import Database
+from fastapi import FastAPI
 from routes.v1 import router as router_v1
+from store.user_store import UserData, UserStore
+from utils.websocket import WebSocketManager
 
 
 async def update_users_state(user_store: UserStore):
     while True:
         await asyncio.sleep(0.1)
 
+        users = []
         connections = WebSocketManager.connection_ids
 
-        # TODO: Reverse the nesting: Collect all users and sent  to all connections, not other way around.
-        for websocket, conn_id in connections.items():
-            users = []
+        for id, user in (await user_store.get_all_users()).items():
+            position = user.pop_position()
 
-            for id, user in (await user_store.get_all_users()).items():
-                if id == conn_id:
-                    continue
+            if not position:
+                continue
 
-                position = user.pop_position()
+            users.append({"id": user.id, "position": position})
 
-                if not position:
-                    continue
-
-                users.append({"id": user.id, "position": position})
-
-            if len(users) > 0:
+        if users:
+            for websocket, conn_id in connections.items():
                 await WebSocketManager.send(
                     websocket,
                     "POINTER_POSITIONS",

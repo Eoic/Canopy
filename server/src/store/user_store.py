@@ -1,23 +1,30 @@
 import asyncio
+from collections import deque
+from dataclasses import asdict, dataclass, field
 from typing import Dict, Union
+
 from utils import WebSocketManager
-from dataclasses import dataclass, field, asdict
 
 
 @dataclass
 class UserData:
     id: str
     position: Dict[str, float] = field(default_factory=lambda: {"x": 0.0, "y": 0.0})
-    positions_buffer: list[Dict[str, float]] = field(default_factory=list)
+    positions_buffer: deque = field(default_factory=lambda: deque(maxlen=10))
 
     def as_dict(self):
-        return asdict(self)
+        return {"id": self.id, "position": self.position}
 
     def pop_position(self) -> Union[Dict[str, float], None]:
         try:
-            return self.positions_buffer.pop(0)
+            position = self.positions_buffer.pop()
+            self.position = position
+            return position
         except IndexError:
             return None
+
+    def push_position(self, position: Dict[str, float]):
+        self.positions_buffer.appendleft(position)
 
 
 class UserStore:
@@ -42,9 +49,7 @@ class UserStore:
     async def record_user_position(self, id: str, position: Dict[str, float]):
         async with self._lock:
             if id in self.users:
-                self.users[id].positions_buffer.append(position)
-                # Update after sending.
-                # self.users[id].position = position
+                self.users[id].push_position(position)
 
     async def get_all_users(self) -> Dict[id, UserData]:
         return self.users

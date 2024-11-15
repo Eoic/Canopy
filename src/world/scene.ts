@@ -231,8 +231,9 @@ export class Scene {
     }
 
     public moveToCell(cellPosition: { x: number, y: number }) {
+        this._viewport.setZoom(1, true);
         this._viewport.moveCenter(cellPosition.x * CELL_FULL_SIZE, cellPosition.y * CELL_HALF_SIZE);
-        this.updateBackground(this._background);
+        this.updateBackground(this._background, { isReplaceNeeded: true });
     }
 
     public zoomIn() {

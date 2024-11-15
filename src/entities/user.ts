@@ -1,4 +1,4 @@
-import { Assets, Container, Graphics, ObservablePoint, Sprite, Text, TextStyle, Texture } from 'pixi.js';
+import { Assets, Container, Graphics, ObservablePoint, Text, TextStyle, Texture } from 'pixi.js';
 import { Layer } from '../world/layers';
 import { Tween, Interpolation } from '@tweenjs/tween.js';
 import { getUserColor } from '../utils/user-utils';
@@ -11,6 +11,7 @@ export type UserData = {
 };
 
 const UPDATE_INTERVAL_MS = 100;
+const TWEEN_INTERVAL_MS = UPDATE_INTERVAL_MS * 0.65;
 
 export class User {
     private readonly _id: string;
@@ -70,15 +71,11 @@ export class User {
             this._toPosition.x = toPosition.x;
             this._toPosition.y = toPosition.y;
 
-            if (Math.abs(this._fromPosition.x - this._toPosition.x) < Number.EPSILON &&
-                Math.abs(this._fromPosition.y - this._toPosition.y) < Number.EPSILON)
-                return;
-
             this._isTweenDone = false;
 
             this._tween = new Tween(this._fromPosition)
-                .to(this._toPosition, UPDATE_INTERVAL_MS * 0.75)
-                .interpolation(Interpolation.Bezier)
+                .to(this._toPosition, TWEEN_INTERVAL_MS)
+                .interpolation(Interpolation.Linear)
                 .onUpdate((position) => this.position = position)
                 .onComplete((_position) => this._isTweenDone = true)
                 .start();
