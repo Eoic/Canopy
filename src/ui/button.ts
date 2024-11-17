@@ -1,6 +1,6 @@
 import { BUTTON } from '../constants';
 import { Layer } from '../world/layers';
-import { Assets, FederatedPointerEvent, Graphics, Sprite, Texture } from 'pixi.js';
+import { Assets, Container, FederatedPointerEvent, Graphics, Sprite, Texture } from 'pixi.js';
 
 export type ButtonOptions = {
     icon: string,
@@ -10,7 +10,7 @@ export type ButtonOptions = {
     position: { x: number, y: number },
 };
 
-export class Button extends Graphics {
+export class Button extends Container {
     private _options: ButtonOptions;
 
     constructor(options: ButtonOptions) {
@@ -36,16 +36,17 @@ export class Button extends Graphics {
         iconGraphics.pivot.set((bounds.x + bounds.width) / 2, (bounds.y + bounds.height) / 2);
         iconGraphics.zIndex = Layer.MenuFG;
 
-        this
+        const buttonGraphics = new Graphics();
+
+        buttonGraphics
             .circle(options.position.x, options.position.y, 15)
             .fill({ color: BUTTON.BACKGROUND_COLOR, alpha: 0.85 });
 
+        this.addChild(buttonGraphics);
         this.addChild(iconGraphics);
 
         this.interactive = true;
         this.cursor = 'pointer';
-        this.eventMode = 'static';
-        this.zIndex = Layer.MenuBG;
 
         this.addEventListener('pointerup', this._handlePointerUp);
         this.addEventListener('pointerdown', this._handlePointerDown);
@@ -73,6 +74,7 @@ export class Button extends Graphics {
             return;
 
         this.tint = BUTTON.PRESS_TINT;
+        this.scale.set(0.95, 0.95);
     };
 
     private _handlePointerUp = (event: FederatedPointerEvent) => {
@@ -83,5 +85,6 @@ export class Button extends Graphics {
 
         this.tint = BUTTON.HOVER_TINT;
         this._options.onClick();
+        this.scale.set(1, 1);
     };
 };
