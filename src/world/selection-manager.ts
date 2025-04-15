@@ -10,7 +10,7 @@ import { CELL_SIZE, CELL_LINE_WIDTH, CELL_COLOR, CELL_FULL_SIZE, POSITION_UPDATE
 
 export class SelectionManager {
     private _scene: Scene;
-    private _activeMenu: PIXI.Container | null = null;
+    private _activeMenu: RadialMenu | null = null;
     private _hoverMarker: PIXI.Container;
     private _selectionMarker: PIXI.Container;
     private _currentCell: Vector = new Vector();
@@ -90,7 +90,8 @@ export class SelectionManager {
 
         if (this._currentCell && this._currentCell.isEqual(this._focusedCell)) {
             if (this._currentCell.isEqual(this._selectedCell) && this._selectionMarker.visible) {
-                this._hideMenu();
+                this._selectionMarker.visible = false;
+                this._activeMenu?.close();
                 return;
             }
 
@@ -116,22 +117,27 @@ export class SelectionManager {
         this._hoverMarker.visible = false;
     };
 
-    private _showMenu(position: { x: number, y: number }) {
-        this._selectionMarker.visible = true;
-        this._selectionMarker.position.set(position.x, position.y);
+    private _handleCloseMenu = (_event: object) => {
+        console.log('Closing a menu from EH...');
 
         if (this._activeMenu) {
             this._selectionMarker.removeChild(this._activeMenu);
-            this._activeMenu.destroy();
+            this._activeMenu.off('close', this._handleCloseMenu);
             this._activeMenu = null;
         }
+    };
+
+    private _showMenu(position: { x: number, y: number }) {
+        this._activeMenu?.close();
+        this._selectionMarker.visible = true;
+        this._selectionMarker.position.set(position.x, position.y);
 
         this._activeMenu = new RadialMenu([
             {
                 icon: 'circle-minus',
                 onClick: () => {
-                    console.log('Deleting...');
-                    // this.hideMenu();
+                    this._selectionMarker.visible = false;
+                    this._activeMenu?.close();
                 },
             },
             { icon: 'circle-plus', onClick: () => { } },
@@ -142,18 +148,9 @@ export class SelectionManager {
             { icon: 'thumbtack', onClick: () => { } }
         ]);
 
+        this._activeMenu.on('close', this._handleCloseMenu);
         this._activeMenu.position.set(this._selectionMarker.width / 2, this._selectionMarker.height / 2);
         this._selectionMarker.addChild(this._activeMenu);
-    }
-
-    private _hideMenu() {
-        this._selectionMarker.visible = false;
-
-        if (this._activeMenu) {
-            this._selectionMarker.removeChild(this._activeMenu);
-            this._activeMenu.destroy();
-            this._activeMenu = null;
-        }
     }
 
     private _sendPosition = (position: { x: number, y: number }) => {
