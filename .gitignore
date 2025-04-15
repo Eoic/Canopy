@@ -27,4 +27,7 @@ dist-ssr
 # Python.
 **/.venv/*
 **/__pycache__/
-**/rustle.db
+**/canopy.db
+
+# Config.
+.env

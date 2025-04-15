@@ -3,7 +3,7 @@ from fastapi import Depends
 from sqlalchemy.engine import Engine
 from sqlmodel import Session, create_engine, SQLModel
 
-database_filename = "rustle.db"
+database_filename = "canopy.db"
 database_url = f"sqlite:///{database_filename}"
 database_args = {"check_same_thread": False}
 
@@ -18,7 +18,8 @@ class Database:
 
     @classmethod
     def __create_engine(cls):
-        cls.engine = create_engine(url=database_url, connect_args=database_args)
+        cls.engine = create_engine(
+            url=database_url, connect_args=database_args)
 
     @classmethod
     def __create_tables(cls):

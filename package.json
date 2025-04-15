@@ -1,11 +1,11 @@
 {
-  "name": "rustle",
+  "name": "canopy",
   "private": false,
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "client": "vite",
-    "server": "cd server && . ./.venv/bin/activate && ./run.sh",
+    "client": "vite --host",
+    "server": "cd server && fastapi dev src/main.py",
     "dev": "concurrently \"npm:client\" \"npm:server\"",
     "build": "tsc && vite build",
     "lint": "eslint src",
@@ -15,7 +15,7 @@
   "author": {
     "name": "Karolis Strazdas",
     "email": "karolis.strazdas@protonmail.com",
-    "url": "https://karolis-strazdas.info"
+    "url": "https://karolis-strazdas.lt"
   },
   "dependencies": {
     "@tweenjs/tween.js": "^25.0.0",
@@ -36,6 +36,6 @@
     "serve": "^14.2.3",
     "typescript": "^5.4.5",
     "typescript-eslint": "^7.7.1",
-    "vite": "^5.0.8"
+    "vite": "^6.2.6"
   }
 }

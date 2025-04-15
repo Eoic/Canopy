@@ -1,8 +1,23 @@
-# Rustle
-Create and engage in real-time discussions to grow the infinite virtual forest. While of potentially little practical value, this is an experiment on applying various networking-related solutions such as real-time chat, multiplayer cursors, infinite grid, spatial partitioning (for network event processing in visible area), and so on.
+# Canopy
+
+Create and engage in real-time discussions to grow infinite virtual forests.
+
+### What is this?
+
+It's spatial, community-driven forum where conversations grow like forests. Instead of linear threads, you plant virtual trees on an infinite, shared grid - each tree representing a message, idea, or reply. Over time, clusters of trees form a virtual forest.
+
+## How it works?
+
+1. Any user can plant a tree anywhere in the grid. Each tree represents a single comment, question or idea.
+2. To reply, users plant a new tree within a circular radius of the original. This creates a spatial "reply" relationship that mirrors real conversation flow in the layout of the forest.
+3. Trees grow in stages based on interaction such as new replies and upvotes. Each interaction contributes to a tree's growth percentage - once reaches 100%, the tree advances to the next growth stage.
+4. Tree type depends on the intention - different species of trees represent different types of posts. There are questions, opinions, ideas, and news.
+5. Selecting a tree opens a side panel with a traditional view of the thread.
 
 ## Development
+
 ### Client
+
 1. Install dependencies:
    ```
    npm ci
@@ -17,6 +32,7 @@ Create and engage in real-time discussions to grow the infinite virtual forest. 
 See [package.json](./package.json) for linting and build commands.
 
 ### Server
+
 1. Change the directory to `server/`.
 2. Create a virtual environment and install dependencies:
    ```
