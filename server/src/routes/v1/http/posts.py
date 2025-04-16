@@ -1,7 +1,8 @@
-from sqlmodel import select
-from database import SessionDep
 from fastapi import APIRouter, HTTPException
-from models.post import PostGet, Post, PostCreate, PostUpdate
+from sqlmodel import select
+
+from database import SessionDep
+from models.post import Post, PostCreate, PostGet, PostUpdate
 
 router = APIRouter(prefix="/posts")
 

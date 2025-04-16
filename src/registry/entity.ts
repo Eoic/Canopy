@@ -1,4 +1,4 @@
 export interface Entity<T> {
     readonly id: string;
-    setData(data: Partial<T>): string[];
+    setData<K extends keyof T>(data: Pick<T, K>): K[];
 };

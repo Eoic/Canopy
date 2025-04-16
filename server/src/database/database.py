@@ -1,7 +1,8 @@
 from typing import Annotated
+
 from fastapi import Depends
 from sqlalchemy.engine import Engine
-from sqlmodel import Session, create_engine, SQLModel
+from sqlmodel import Session, SQLModel, create_engine
 
 database_filename = "canopy.db"
 database_url = f"sqlite:///{database_filename}"
@@ -18,8 +19,7 @@ class Database:
 
     @classmethod
     def __create_engine(cls):
-        cls.engine = create_engine(
-            url=database_url, connect_args=database_args)
+        cls.engine = create_engine(url=database_url, connect_args=database_args)
 
     @classmethod
     def __create_tables(cls):

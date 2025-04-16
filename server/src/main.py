@@ -1,10 +1,11 @@
 import asyncio
 from contextlib import asynccontextmanager
 
-from database.database import Database
 from fastapi import FastAPI
+
+from database.database import Database
 from routes.v1 import router as router_v1
-from store.user_store import UserData, UserStore
+from store.user_store import UserStore
 from utils.websocket import WebSocketManager
 
 
@@ -15,7 +16,7 @@ async def update_users_state(user_store: UserStore):
         users = []
         connections = WebSocketManager.connection_ids
 
-        for id, user in (await user_store.get_all_users()).items():
+        for user in (await user_store.get_all_users()).values():
             position = user.pop_position()
 
             if not position:
@@ -24,7 +25,7 @@ async def update_users_state(user_store: UserStore):
             users.append({"id": user.id, "position": position})
 
         if users:
-            for websocket, conn_id in connections.items():
+            for websocket, _conn_id in connections.items():
                 await WebSocketManager.send(
                     websocket,
                     "POINTER_POSITIONS",

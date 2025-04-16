@@ -1,26 +1,28 @@
 import { InMessages, InMessageType, InWebSocketMessage } from '../network/types';
 import { ConnectionManager } from '../network/connection-manager';
-import { Users } from '../repository/users';
-import { User } from '../entities/user';
 import { Vector } from '../math/vector';
-import { Viewport } from 'pixi-viewport';
+import { UserService } from '../service/user-service';
 
 export class ActionsHandler {
-    private _users: Users;
-    private _viewport: Viewport;
+    private _userService: UserService;
     private _isEnabled: boolean = false;
 
-    constructor(users: Users, viewport: Viewport) {
-        this._users = users;
-        this._viewport = viewport;
+    constructor(userService: UserService) {
+        this._userService = userService;
     }
 
     public enable() {
+        if (this._isEnabled)
+            throw new Error('Already enabled!');
+
         this._addEvents();
         this._isEnabled = true;
     }
 
     public disable() {
+        if (!this._isEnabled)
+            throw new Error('Already disabled!');
+
         this._removeEvents();
         this._isEnabled = false;
     }
@@ -44,38 +46,44 @@ export class ActionsHandler {
             case InMessageType.PointerPositions:
                 this._handlePointerPositions(data.message);
                 break;
-            case InMessageType.Users:
-                this._handleUsers(data.message);
-                break;
             default:
                 break;
         }
     };
 
     private _handleConnect = (data: InMessages[InMessageType.Connect]['message']) => {
-        const user = new User(data.id, new Vector(0, 0));
+        // const user = new User(data.id, new Vector(0, 0));
 
-        // TODO: Not great.
+        // TODO: Not good.
         if (data.isAuthor)
-            this._users.currentUser = user;
+            this._userService.setCurrentUser(data);
+            // this._users.currentUser = user;
 
-        this._users.addEntity(user);
+        this._userService.addUser(data);
+        // this._users.addEntity(user);
     };
 
     private _handleDisconnect = (data: InMessages[InMessageType.Disconnect]['message']) => {
-        this._users.removeEntity(data.id);
+        // this._users.removeEntity(data.id);
+        this._userService.removeUser(data);
     };
 
     private _handlePointerPositions = (data: InMessages[InMessageType.PointerPositions]['message']) => {
         data.positions.forEach((entity) => {
             const position = new Vector(entity.position.x, entity.position.y);
-            const user = this._users.getEntity(entity.id);
+            const user = this._userService.getUser(entity.id);
+            // const user = this._users.getEntity(entity.id);
 
-            if (user?.id === this._users.currentUser?.id)
+            if (user?.id === this._userService.getCurrentUser()?.id/*this._users.currentUser?.id*/)
                 return;
 
             if (user) {
-                this._users.updateEntity(
+                // this._users.updateEntity(
+                //     entity.id,
+                //     { positionsBuffer: [...user.positionsBuffer, position] }
+                // );
+
+                this._userService.updateUser(
                     entity.id,
                     { positionsBuffer: [...user.positionsBuffer, position] }
                 );
@@ -83,10 +91,10 @@ export class ActionsHandler {
         });
     };
 
-    private _handleUsers = (data: InMessages[InMessageType.Users]['message']) => {
-        data.users.forEach((userData) => {
-            const user = new User(userData.id, new Vector(userData.position.x, userData.position.y));
-            this._users.addEntity(user);
-        });
-    };
+    // private _handleUsers = (data: InMessages[InMessageType.Users]['message']) => {
+    //     data.users.forEach((userData) => {
+    //         const user = new User(userData.id, new Vector(userData.position.x, userData.position.y));
+    //         this._users.addEntity(user);
+    //     });
+    // };
 };

@@ -1,6 +1,7 @@
 import asyncio
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+
 from store.user_store import UserData, UserStore
 from utils.websocket import WebSocketManager
 
@@ -15,13 +16,13 @@ async def websocket(websocket: WebSocket):
     await user_store.add_user(id, UserData(id=id, position={"x": 0, "y": 0}))
     await WebSocketManager.send(websocket, "CONNECT", {"id": id, "isAuthor": True})
 
-    users = (await user_store.get_all_users()).values()
+    # users = (await user_store.get_all_users()).values()
 
-    await WebSocketManager.send(
-        websocket,
-        "USERS",
-        {"users": list(map(lambda user: user.as_dict(), users))},
-    )
+    # await WebSocketManager.send(
+    #     websocket,
+    #     "USERS",
+    #     {"users": [user.as_dict() for user in users]},
+    # )
 
     await WebSocketManager.broadcast(
         websocket,
@@ -43,5 +44,5 @@ async def websocket(websocket: WebSocket):
     except WebSocketDisconnect:
         id = WebSocketManager.id(websocket)
         WebSocketManager.disconnect(websocket)
-        await WebSocketManager.broadcast(id, "DISCONNECT", {"id": id}, True)
+        await WebSocketManager.broadcast(websocket, "DISCONNECT", {"id": id}, True)
         await user_store.remove_user(id)

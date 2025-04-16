@@ -1,7 +1,7 @@
 import { Registry } from './registry';
 import { User, UserData } from '../entities/user';
 
-export class Users extends Registry<User, UserData> {
+export class UserRegistry extends Registry<User, UserData> {
     private _currentUser?: User;
 
     get currentUser(): User | undefined {

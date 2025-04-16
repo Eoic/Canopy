@@ -4,6 +4,7 @@ import { Tween, Interpolation } from '@tweenjs/tween.js';
 import { getUserColor } from '../utils/user-utils';
 
 export type UserData = {
+    id: string;
     cursor: Container;
     positionsBuffer: { x: number, y: number }[];
     fromPosition: { x: number, y: number };
@@ -50,6 +51,7 @@ export class User {
         this._id = id;
 
         this._data = {
+            id,
             cursor: this._createCursor(id, id),
             positionsBuffer: [position],
             fromPosition: { ...position },
@@ -82,10 +84,10 @@ export class User {
         }
     }
 
-    public setData(data: Partial<UserData>): string[] {
-        const updatedKeys: string[] = [];
+    public setData<K extends keyof UserData>(data: Pick<UserData, K>): K[] {
+        const updatedKeys: K[] = [];
 
-        for (const [key, value] of Object.entries(data)) {
+        for (const [key, value] of Object.entries(data) as [K, UserData[K]][]) {
             this._data[key] = value;
             updatedKeys.push(key);
         }

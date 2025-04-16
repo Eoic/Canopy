@@ -13,7 +13,7 @@ import {
 import { Layer } from './layers';
 import { SelectionManager } from './selection-manager';
 import { ActionsHandler } from './actions-handler';
-import { Users } from '../repository/users';
+// import { UsersRegistry } from '../registry/users';
 import { PositionConverter } from '../math/position-converter';
 import { Vector } from '../math/vector';
 import { UI } from '../ui/ui';
@@ -30,7 +30,7 @@ export class Scene {
     private _selectionManager!: SelectionManager;
     private _actionsHandler!: ActionsHandler;
     private _positionConverter!: PositionConverter;
-    private _users!: Users;
+    // private _users!: Users;
     private _ui!: UI;
 
     get app() {
@@ -41,9 +41,9 @@ export class Scene {
         return this._viewport;
     }
 
-    get users() {
-        return this._users;
-    }
+    // get users() {
+    //     return this._users;
+    // }
 
     constructor(onReady: VoidFunction) {
         this.setupApp(document.body).then(async (app: PIXI.Application) => {
@@ -51,31 +51,31 @@ export class Scene {
             this._viewport = this.setupViewport(this._app);
             this._background = this.setupBackground();
             this._viewport.addChild(this._background);
-            this._users = new Users();
+            // this._users = new Users();
             this._ui = new UI(this);
             this._selectionManager = new SelectionManager(this);
-            this._actionsHandler = new ActionsHandler(this._users, this._viewport);
+            // this._actionsHandler = new ActionsHandler(this._users);
             this._positionConverter = new PositionConverter(this._viewport);
-            this.setupEvents();
+            this._setupEvents();
             this._selectionManager.enable();
             this._actionsHandler.enable();
             this._ui.enable();
 
             await this.loadAssets();
 
-            this._users.onAdd((entity) => {
-                if (this._users.isCurrentUser(entity.id))
-                    return;
+            // this._users.onAdd((entity) => {
+            //     if (this._users.isCurrentUser(entity.id))
+            //         return;
 
-                this.viewport.addChild(entity.cursor);
-            });
+            //     this.viewport.addChild(entity.cursor);
+            // });
 
-            this._users.onRemove((entity) => {
-                if (this._users.isCurrentUser(entity.id))
-                    return;
+            // this._users.onRemove((entity) => {
+            //     if (this._users.isCurrentUser(entity.id))
+            //         return;
 
-                this.viewport.removeChild(entity.cursor);
-            });
+            //     this.viewport.removeChild(entity.cursor);
+            // });
 
             this._app.ticker.start();
             onReady();
@@ -186,7 +186,7 @@ export class Scene {
             this._viewport.removeChildAt(index);
     }
 
-    private setupEvents() {
+    private _setupEvents() {
         window.addEventListener('resize', this.handleWindowResize);
         window.addEventListener('mousedown', this.handleWindowMouseDown);
         this._app.ticker.autoStart = false;
@@ -247,19 +247,19 @@ export class Scene {
     }
 
     private handlePointerMove = (event: PIXI.FederatedPointerEvent) => {
-        if (!this._users.currentUser)
-            return;
+        // if (!this._users.currentUser)
+        //     return;
 
-        if (event.nativeEvent.target !== this._app.canvas)
-            return;
+        // if (event.nativeEvent.target !== this._app.canvas)
+        //     return;
 
-        const position = this._positionConverter.screenToRawWorld(event);
-        this._users.currentUser.position = { x: position.x, y: position.y };
+        // const position = this._positionConverter.screenToRawWorld(event);
+        // this._users.currentUser.position = { x: position.x, y: position.y };
     };
 
     private handleUpdate = (ticker: PIXI.Ticker) => {
-        for (const user of this._users.entities.values())
-            user.update(ticker.deltaMS, this._viewport.scale);
+        // for (const user of this._users.entities.values())
+        //     user.update(ticker.deltaMS, this._viewport.scale);
     };
 
     private handleWindowResize = () => {

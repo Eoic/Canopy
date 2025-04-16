@@ -1,21 +1,18 @@
 import uuid
-from typing import Dict
 
 from fastapi import WebSocket
 
 
 class WebSocketManager:
     active_connections: list[WebSocket] = []
-    connection_ids: Dict[WebSocket, uuid.UUID] = {}
+    connection_ids: dict[WebSocket, uuid.UUID] = {}
 
     @classmethod
     def id(cls, websocket: WebSocket) -> str:
         return str(cls.connection_ids.get(websocket))
 
     @classmethod
-    def get_connection_ids(
-        cls, websocket: WebSocket, exclude_self: bool = False
-    ) -> list[uuid.UUID]:
+    def get_connection_ids(cls, websocket: WebSocket, exclude_self: bool = False) -> list[uuid.UUID]:
         ids = list(cls.connection_ids.values())
 
         if exclude_self:
@@ -39,14 +36,12 @@ class WebSocketManager:
         await websocket.send_json({"type": type, "message": message})
 
     @classmethod
-    async def broadcast(
-        cls, sender: WebSocket, type: str, message: object, exclude_self: bool = False
-    ):
+    async def broadcast(cls, sender: WebSocket, type: str, message: object, exclude_self: bool = False):
         for connection in cls.active_connections:
             if exclude_self and sender == connection:
                 continue
 
             try:
                 await connection.send_json({"type": type, "message": message})
-            except Exception as e:
-                print("Failed to send", e)
+            except Exception as error:
+                print("Failed to send", error)
