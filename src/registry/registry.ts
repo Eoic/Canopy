@@ -14,14 +14,22 @@ export class Registry<T extends Entity<U>, U> {
         return this._entities;
     }
 
-    public getEntity(id: string): T | undefined {
-        return this._entities.get(id);
+    public getEntity(id: string): T | null {
+        return this._entities.get(id) || null;
+    }
+
+    public getEntities(): T[] {
+        return Array.from(this._entities.values());
     }
 
     public addEntity(entity: T) {
         this._entities.set(entity.id, entity);
         this._onAddCallback?.([entity]);
     };
+
+    public hasEntity(id: string): boolean {
+        return this._entities.has(id);
+    }
 
     public updateEntity(id: string, entityData: Pick<U, keyof U>) {
         const entity = this._entities.get(id);

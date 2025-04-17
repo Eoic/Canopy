@@ -23,10 +23,8 @@ export type InMessages = {
         message: {
             users: Array<{
                 id: string,
-                position: {
-                    x: number,
-                    y: number,
-                }
+                isLocal: boolean,
+                position: { x: number, y: number,}
             }>
         }
     },
@@ -35,7 +33,8 @@ export type InMessages = {
         type: InMessageType.Connect,
         message: {
             id: string,
-            isAuthor: boolean,
+            isLocal: boolean,
+            position: { x: number, y: number, },
         }
     },
 
@@ -43,7 +42,8 @@ export type InMessages = {
         type: InMessageType.Disconnect,
         message: {
             id: string,
-            isAuthor: boolean,
+            isLocal: boolean,
+            position: { x: number, y: number, },
         }
     },
 
@@ -52,6 +52,7 @@ export type InMessages = {
         message: {
             positions: Array<{
                 id: string,
+                isLocal: boolean,
                 position: { x: number, y: number }
             }>
         }
@@ -67,7 +68,7 @@ export type OutMessages = {
         type: OutMessageType.SwitchCell,
         message: {
             prevCell: { x: number, y: number } | null,
-            nextCell: { x: number, y: number } | null
+            nextCell: { x: number, y: number } | null,
         }
     },
 
@@ -75,10 +76,7 @@ export type OutMessages = {
         type: OutMessageType.PointerPosition
         message: {
             id: string,
-            position: {
-                x: number,
-                y: number
-            }
+            position: { x: number, y: number },
         },
     },
 };

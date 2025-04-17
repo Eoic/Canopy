@@ -1,61 +1,61 @@
-import { Assets, Container, Graphics, ObservablePoint, Text, TextStyle, Texture } from 'pixi.js';
+import { Assets, Container, Graphics, ObservablePoint, Text, TextStyle, Texture, PointData } from 'pixi.js';
 import { Layer } from '../world/layers';
 import { Tween, Interpolation } from '@tweenjs/tween.js';
 import { getUserColor } from '../utils/user-utils';
-
-export type UserData = {
-    id: string;
-    cursor: Container;
-    positionsBuffer: { x: number, y: number }[];
-    fromPosition: { x: number, y: number };
-    toPosition: { x: number, y: number };
-};
+import { UserDTO } from '../network/types/user';
 
 const UPDATE_INTERVAL_MS = 100;
 const TWEEN_INTERVAL_MS = UPDATE_INTERVAL_MS * 0.65;
 
+export type UserState = {
+    id: string;
+    isLocal: boolean;
+    cursor: UserCursor;
+    positionsBuffer: PointData[];
+    positionFrom: PointData;
+    positionTo: PointData;
+};
+
+export type UserCursor = {
+    name: Text;
+    container: Container;
+}
+
 export class User {
-    private readonly _id: string;
     private _tween: Tween;
-    private _data: UserData;
+    private _state: UserState;
     private _isTweenDone: boolean = true;
-    private _fromPosition: { x: number, y: number } = { x: 0, y: 0 };
-    private _toPosition: { x: number, y: number } = { x: 0, y: 0 };
-    private _name?: Text;
+    private _fromPosition: PointData = { x: 0, y: 0 };
+    private _toPosition: PointData = { x: 0, y: 0 };
 
     get id() {
-        return this._id;
+        return this._state.id;
     }
 
     get position() {
-        return {
-            x: this._data.cursor.position.x,
-            y: this._data.cursor.position.y,
-        };
+        return this._state.cursor.container.position;
     }
 
-    set position(value: { x: number, y: number }) {
-        this._data.cursor.position.x = value.x;
-        this._data.cursor.position.y = value.y;
+    set position(value: PointData) {
+        this._state.cursor.container.position.copyFrom(value);
     }
 
     get positionsBuffer() {
-        return this._data.positionsBuffer;
+        return this._state.positionsBuffer;
     }
 
     get cursor() {
-        return this._data.cursor;
+        return this._state.cursor;
     }
 
-    constructor(id: string, position: { x: number, y: number }) {
-        this._id = id;
-
-        this._data = {
-            id,
-            cursor: this._createCursor(id, id),
-            positionsBuffer: [position],
-            fromPosition: { ...position },
-            toPosition: { ...position },
+    constructor(data: UserDTO) {
+        this._state = {
+            id: data.id,
+            isLocal: data.isLocal,
+            cursor: this._createCursor(data.id, `User(${data.id})`),
+            positionsBuffer: [{ ...data.position }],
+            positionFrom: { ...data.position },
+            positionTo: { ...data.position },
         };
 
         this._tween = new Tween(this._fromPosition);
@@ -63,16 +63,15 @@ export class User {
 
     public update(_deltaMs: number, scale: ObservablePoint) {
         this._tween.update();
-        this._name!.resolution = scale._x;
+        this._state.cursor.name.resolution = scale._x;
 
-        if (this._isTweenDone && this._data.positionsBuffer.length > 0) {
-            this._fromPosition.x = this._data.cursor.position.x;
-            this._fromPosition.y = this._data.cursor.position.y;
+        if (this._isTweenDone && this._state.positionsBuffer.length > 0) {
+            this._fromPosition.x = this._state.cursor.container.position.x;
+            this._fromPosition.y = this._state.cursor.container.position.y;
 
-            const toPosition = this._data.positionsBuffer.shift()!;
+            const toPosition = this._state.positionsBuffer.shift()!;
             this._toPosition.x = toPosition.x;
             this._toPosition.y = toPosition.y;
-
             this._isTweenDone = false;
 
             this._tween = new Tween(this._fromPosition)
@@ -84,18 +83,18 @@ export class User {
         }
     }
 
-    public setData<K extends keyof UserData>(data: Pick<UserData, K>): K[] {
+    public setData<K extends keyof UserState>(data: Pick<UserState, K>): K[] {
         const updatedKeys: K[] = [];
 
-        for (const [key, value] of Object.entries(data) as [K, UserData[K]][]) {
-            this._data[key] = value;
+        for (const [key, value] of Object.entries(data) as [K, UserState[K]][]) {
+            this._state[key] = value;
             updatedKeys.push(key);
         }
 
         return updatedKeys;
     }
 
-    private _createCursor(id: string, name: string) {
+    private _createCursor(id: string, userName: string): UserCursor {
         const cursorTexture = Assets.get<Texture>(['cursor']);
 
         if (!cursorTexture)
@@ -104,30 +103,33 @@ export class User {
         const color = getUserColor(id);
         const cursorContainer = new Container();
         const cursor = new Graphics(cursorTexture['0']);
-        const nameContainer = this._createNameTag(name, color, cursor);
+        const name = this._createName(userName);
+        const nameContainer = this._createNameContainer(name, color, cursor);
         cursor.tint = color;
         cursorContainer.addChild(nameContainer);
         cursorContainer.addChild(cursor);
         cursorContainer.zIndex = Layer.Cursor;
 
-        return cursorContainer;
+        return { container: cursorContainer, name };
     }
 
-    private _createNameTag(text: string, color: number, cursor: Graphics): Container {
-        const name = new Container();
+    private _createName(text: string) {
         const style = new TextStyle({ fill: 0xFFFFFF, fontSize: 11, letterSpacing: 1 });
-        const nameText = new Text({ text, style, anchor: { x: 0.5, y: 0.5 } });
+        return new Text({ text, style, anchor: { x: 0.5, y: 0.5 } });
+    }
 
-        const nameRect = new Graphics()
-            .roundRect(0, 0, nameText.width + 10, nameText.height + 5, 3)
+    private _createNameContainer(text: Text, color: number, cursor: Graphics): Container {
+        const container = new Container();
+
+        const rect = new Graphics()
+            .roundRect(0, 0, text.width + 10, text.height + 5, 3)
             .fill(color);
 
-        name.addChild(nameRect);
-        name.addChild(nameText);
-        name.pivot.set(-cursor.width / 2, -cursor.height);
-        nameText.pivot.set(-nameRect.width / 2, -nameRect.height / 2);
-        this._name = nameText;
+        container.addChild(rect);
+        container.addChild(text);
+        container.pivot.set(-cursor.width / 2, -cursor.height);
+        text.pivot.set(-rect.width / 2, -rect.height / 2);
 
-        return name;
+        return container;
     }
 };

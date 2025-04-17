@@ -1,5 +1,6 @@
 from fastapi import APIRouter
-from .http import index_router, users_router, posts_router
+
+from .http import index_router, posts_router, users_router
 from .websocket import events_router
 
 router = APIRouter()

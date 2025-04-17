@@ -4,9 +4,10 @@ import { Layer } from './layers';
 import { Vector } from '../math/vector';
 import { throttle } from 'throttle-debounce';
 import { RadialMenu } from '../ui/radial-menu';
-import { OutMessageType } from '../network/types';
+import { OutMessageType } from '../network/types/message';
 import { ConnectionManager } from '../network/connection-manager';
 import { CELL_SIZE, CELL_LINE_WIDTH, CELL_COLOR, CELL_FULL_SIZE, POSITION_UPDATE_THROTTLE_MS } from '../constants';
+import { PointData } from 'pixi.js';
 
 export class SelectionManager {
     private _scene: Scene;
@@ -101,15 +102,17 @@ export class SelectionManager {
     };
 
     private _handleAppPointerMove = (_event: PointerEvent) => {
-        if (!this._scene.users.currentUser)
+        const localUser = this._scene.userService.getLocalUser();
+
+        if (!localUser)
             return;
 
-        const worldPosition = this._scene.rawWorldToSnappedWorld(this._scene.users.currentUser.position);
+        const worldPosition = this._scene.rawWorldToSnappedWorld(localUser.position);
         const cellPosition = this._scene.rawWorldToCellIndex(worldPosition);
         this._currentCell.set(cellPosition.x, cellPosition.y);
         this._hoverMarker.position.set(worldPosition.x, worldPosition.y);
         this._hoverMarker.visible = true;
-        this._sendPosition(this._scene.users.currentUser.position);
+        this._sendPosition(localUser.position);
         this._positionText.innerText = `(X: ${cellPosition.x}, Y: ${cellPosition.y})`;
     };
 
@@ -127,7 +130,7 @@ export class SelectionManager {
         }
     };
 
-    private _showMenu(position: { x: number, y: number }) {
+    private _showMenu(position: PointData) {
         this._activeMenu?.close();
         this._selectionMarker.visible = true;
         this._selectionMarker.position.set(position.x, position.y);
@@ -153,11 +156,16 @@ export class SelectionManager {
         this._selectionMarker.addChild(this._activeMenu);
     }
 
-    private _sendPosition = (position: { x: number, y: number }) => {
+    private _sendPosition = (position: PointData) => {
+        const localUser = this._scene.userService.getLocalUser();
+
+        if (!localUser)
+            return;
+
         ConnectionManager.instance.send({
             type: OutMessageType.PointerPosition,
             message: {
-                id: this._scene.users.currentUser!.id,
+                id: localUser.id,
                 position: { ...position },
             },
         });

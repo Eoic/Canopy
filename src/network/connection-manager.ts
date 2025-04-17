@@ -1,4 +1,4 @@
-import { InWebSocketMessage, OutMessages, OutMessageType } from './types';
+import { InWebSocketMessage, OutMessages, OutMessageType } from './types/message';
 
 type Callbacks = {
     open?: Array<VoidFunction>;

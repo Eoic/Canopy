@@ -14,7 +14,7 @@ export async function request<T>(
     if (path.startsWith('/'))
         path = path.substring(1, path.length);
 
-    const url = `${API_BASE}/${path}`;
+    const url = `${API_BASE}${path}`;
     const headers = { 'Content-Type': 'application/json', ...(options.headers ?? {}) };
     const init: RequestInit = { ...options, headers };
 

@@ -5,5 +5,5 @@ export abstract class Repository<D, E, R> {
         this._registry = registry;
     }
 
-    protected abstract _hydrate(dto: D): E
+    public abstract hydrate(dto: D): E
 }

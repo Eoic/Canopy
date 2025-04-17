@@ -13,10 +13,12 @@ import {
 import { Layer } from './layers';
 import { SelectionManager } from './selection-manager';
 import { ActionsHandler } from './actions-handler';
-// import { UsersRegistry } from '../registry/users';
 import { PositionConverter } from '../math/position-converter';
 import { Vector } from '../math/vector';
 import { UI } from '../ui/ui';
+import { UserService } from '../service/user-service';
+import { UserRegistry } from '../registry/user-registry';
+import { UserRepository } from '../repository/user-repository';
 
 type ViewportEvent = {
     type: string;
@@ -24,14 +26,14 @@ type ViewportEvent = {
 };
 
 export class Scene {
-    private _app!: PIXI.Application;
+    private _ui!: UI;
     private _viewport!: Viewport;
+    private _app!: PIXI.Application;
     private _background!: PIXI.TilingSprite;
     private _selectionManager!: SelectionManager;
     private _actionsHandler!: ActionsHandler;
     private _positionConverter!: PositionConverter;
-    // private _users!: Users;
-    private _ui!: UI;
+    private _userService!: UserService;
 
     get app() {
         return this._app;
@@ -41,42 +43,49 @@ export class Scene {
         return this._viewport;
     }
 
-    // get users() {
-    //     return this._users;
-    // }
+    get userService() {
+        return this._userService;
+    }
 
     constructor(onReady: VoidFunction) {
+        const userRegistry = new UserRegistry();
+        const userRepository = new UserRepository(userRegistry);
+        this._userService = new UserService(userRepository, userRegistry);
+
         this.setupApp(document.body).then(async (app: PIXI.Application) => {
             this._app = app;
             this._viewport = this.setupViewport(this._app);
             this._background = this.setupBackground();
             this._viewport.addChild(this._background);
-            // this._users = new Users();
             this._ui = new UI(this);
             this._selectionManager = new SelectionManager(this);
-            // this._actionsHandler = new ActionsHandler(this._users);
+            this._actionsHandler = new ActionsHandler(this._userService);
             this._positionConverter = new PositionConverter(this._viewport);
-            this._setupEvents();
             this._selectionManager.enable();
             this._actionsHandler.enable();
             this._ui.enable();
+            this._setupEvents();
+
+            this._userService.registry.onAdd((entities) => {
+                for (const entity of entities) {
+                    if (this._userService.isLocalUser(entity.id))
+                        return;
+
+                    this._viewport.addChild(entity.cursor.container);
+                }
+            });
+
+            this._userService.registry.onRemove((entities) => {
+                for (const entity of entities) {
+                    if (this._userService.isLocalUser(entity.id))
+                        return;
+
+                    this.viewport.removeChild(entity.cursor.container);
+                }
+            });
 
             await this.loadAssets();
-
-            // this._users.onAdd((entity) => {
-            //     if (this._users.isCurrentUser(entity.id))
-            //         return;
-
-            //     this.viewport.addChild(entity.cursor);
-            // });
-
-            // this._users.onRemove((entity) => {
-            //     if (this._users.isCurrentUser(entity.id))
-            //         return;
-
-            //     this.viewport.removeChild(entity.cursor);
-            // });
-
+            await this._userService.loadUsers();
             this._app.ticker.start();
             onReady();
         }).catch((error) => {
@@ -247,19 +256,20 @@ export class Scene {
     }
 
     private handlePointerMove = (event: PIXI.FederatedPointerEvent) => {
-        // if (!this._users.currentUser)
-        //     return;
+        const localUser = this._userService.getLocalUser();
 
-        // if (event.nativeEvent.target !== this._app.canvas)
-        //     return;
+        if (!localUser)
+            return;
 
-        // const position = this._positionConverter.screenToRawWorld(event);
-        // this._users.currentUser.position = { x: position.x, y: position.y };
+        if (event.nativeEvent.target !== this._app.canvas)
+            return;
+
+        localUser.position = this._positionConverter.screenToRawWorld(event);
     };
 
     private handleUpdate = (ticker: PIXI.Ticker) => {
-        // for (const user of this._users.entities.values())
-        //     user.update(ticker.deltaMS, this._viewport.scale);
+        for (const user of this._userService.getUsers())
+            user.update(ticker.deltaMS, this._viewport.scale);
     };
 
     private handleWindowResize = () => {
