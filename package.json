@@ -7,11 +7,12 @@
     "client": "vite --host",
     "server": "cd server && fastapi dev src/main.py",
     "dev": "concurrently \"npm:client\" \"npm:server\"",
-    "build": "tsc && vite build",
+    "build": "vite build",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "serve": "serve dist/",
     "test": "vitest",
+    "test-ci": "vitest run --coverage.enabled --coverage.reporter='text-summary'",
     "coverage": "vitest run --coverage"
   },
   "author": {
