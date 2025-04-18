@@ -33,7 +33,12 @@ export class User {
     }
 
     get position() {
-        return this._state.cursor.container.position;
+        const point = this._state.cursor.container.position;
+
+        return {
+            x: point.x,
+            y: point.y,
+        };
     }
 
     set position(value: PointData) {
