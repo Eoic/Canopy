@@ -10,7 +10,9 @@
     "build": "tsc && vite build",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
-    "serve": "serve dist/"
+    "serve": "serve dist/",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
   },
   "author": {
     "name": "Karolis Strazdas",
@@ -30,12 +32,14 @@
     "@types/alpinejs": "^3.13.10",
     "@types/eslint__js": "^8.42.3",
     "@types/throttle-debounce": "^5.0.2",
+    "@vitest/coverage-v8": "^3.1.1",
     "concurrently": "^9.0.1",
     "eslint": "^8.57.0",
     "sass": "^1.69.5",
     "serve": "^14.2.3",
     "typescript": "^5.4.5",
     "typescript-eslint": "^7.7.1",
-    "vite": "^6.2.6"
+    "vite": "^6.2.6",
+    "vitest": "^3.1.1"
   }
 }

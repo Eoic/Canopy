@@ -31,3 +31,6 @@ dist-ssr
 
 # Config.
 .env
+
+# Tests
+coverage
