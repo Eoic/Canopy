@@ -1,4 +1,4 @@
-import { User, UserState } from '../entities/user';
+import { User, UserState } from '../registry/entities/user';
 import { Repository } from './repository';
 import { UserAPI } from '../api/users';
 import { UserRegistry } from '../registry/user-registry';

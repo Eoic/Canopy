@@ -1,8 +1,8 @@
 import { Assets, Container, Graphics, ObservablePoint, Text, TextStyle, Texture, PointData } from 'pixi.js';
-import { Layer } from '../world/layers';
+import { Layer } from '../../world/layers';
 import { Tween, Interpolation } from '@tweenjs/tween.js';
-import { getUserColor } from '../utils/user-utils';
-import { UserDTO } from '../network/types/user';
+import { getUserColor } from '../../utils/user-utils';
+import { UserDTO } from '../../network/types/user';
 
 const UPDATE_INTERVAL_MS = 100;
 const TWEEN_INTERVAL_MS = UPDATE_INTERVAL_MS * 0.65;

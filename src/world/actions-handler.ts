@@ -2,7 +2,7 @@ import { InMessages, InMessageType, InWebSocketMessage } from '../network/types/
 import { ConnectionManager } from '../network/connection-manager';
 import { Vector } from '../math/vector';
 import { UserService } from '../service/user-service';
-import { UserState } from '../entities/user';
+import { UserState } from '../registry/entities/user';
 
 export class ActionsHandler {
     private _userService: UserService;

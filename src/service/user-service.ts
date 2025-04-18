@@ -1,7 +1,7 @@
 import { Service } from './service';
 import { UserRegistry } from '../registry/user-registry';
 import { UserRepository } from '../repository/user-repository';
-import { User, UserState } from '../entities/user';
+import { User, UserState } from '../registry/entities/user';
 import { UserDTO } from '../network/types/user';
 
 export class UserService extends Service<UserRepository, UserRegistry> {

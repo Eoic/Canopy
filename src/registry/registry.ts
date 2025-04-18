@@ -1,4 +1,4 @@
-import { Entity } from './entity';
+import { Entity } from './entities/entity';
 
 type OnAddCallback<T> = (entities: T[]) => void;
 type OnRemoveCallback<T> = (entities: T[]) => void;
@@ -39,13 +39,6 @@ export class Registry<T extends Entity<U>, U> {
 
         const updatedKeys = entity.setData(entityData);
         this._onUpdateCallback?.([entity], updatedKeys);
-    }
-
-    public upsertEntities(entities: Array<T>) {
-        for (const entity of entities)
-            this._entities.set(entity.id, entity);
-
-        this._onAddCallback?.(entities);
     }
 
     public removeEntity(id: string) {

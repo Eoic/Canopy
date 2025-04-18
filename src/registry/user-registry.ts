@@ -1,5 +1,5 @@
 import { Registry } from './registry';
-import { User, UserState } from '../entities/user';
+import { User, UserState } from './entities/user';
 
 export class UserRegistry extends Registry<User, UserState> {
     private _localUserId: string | null = null;
@@ -8,7 +8,7 @@ export class UserRegistry extends Registry<User, UserState> {
         return this._localUserId;
     }
 
-    public set localUserId(id: string) {
+    public set localUserId(id: string | null) {
         this._localUserId = id;
     }
 };
