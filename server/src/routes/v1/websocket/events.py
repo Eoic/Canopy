@@ -16,16 +16,16 @@ async def websocket(websocket: WebSocket):
     await user_store.add_user(id, UserData(id=id, position={"x": 0, "y": 0}))
     await WebSocketManager.send(websocket, "CONNECT", {"id": id, "isLocal": True, "position": {"x": 0, "y": 0}})
 
-    # await WebSocketManager.broadcast(
-    #     sender=websocket,
-    #     type="CONNECT",
-    #     message={
-    #         "id": id,
-    #         "isLocal": False,
-    #         "position": {"x": 0, "y": 0},
-    #     },
-    #     exclude_self=False,
-    # )
+    await WebSocketManager.broadcast(
+        sender=websocket,
+        type="CONNECT",
+        message={
+            "id": id,
+            "isLocal": False,
+            "position": {"x": 0, "y": 0},
+        },
+        exclude_self=True,
+    )
 
     try:
         while True:

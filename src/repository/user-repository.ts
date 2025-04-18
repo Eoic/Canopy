@@ -5,9 +5,9 @@ import { UserRegistry } from '../registry/user-registry';
 import { UserDTO } from '../network/types/user';
 
 export class UserRepository extends Repository<UserDTO, User, UserRegistry> {
-    public async fetchUsers(): Promise<User[]> {
-        const usersData = await UserAPI.fetchAll();
-        return usersData.users.map((userData) => this.hydrate(userData));
+    public async fetchUsers(localUserId: string): Promise<UserDTO[]> {
+        const usersData = await UserAPI.fetchAll(localUserId);
+        return usersData.users;
     }
 
     public hydrate(dto: UserDTO): User {
@@ -19,6 +19,10 @@ export class UserRepository extends Repository<UserDTO, User, UserRegistry> {
             throw new Error(`User with id ${data.id} already exists.`);
 
         const user = this.hydrate(data);
+
+        if (data.isLocal)
+            this.setLocalUser(user.id);
+
         this._registry.addEntity(user);
 
         return user;

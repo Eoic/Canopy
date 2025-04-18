@@ -85,7 +85,6 @@ export class Scene {
             });
 
             await this.loadAssets();
-            await this._userService.loadUsers();
             this._app.ticker.start();
             onReady();
         }).catch((error) => {

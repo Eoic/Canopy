@@ -75,7 +75,7 @@ export class ConnectionManager {
     };
 
     private _handleError = (event: Event) => {
-        console.log(`[${ConnectionManager.LOG_LABEL}] Error:`, event);
+        console.error(`[${ConnectionManager.LOG_LABEL}] Error:`, event);
 
         if (this._callbacks.error && this._callbacks.error.length > 0)
             this._callbacks.error?.forEach((callback) => callback('An error occurred.'));

@@ -121,8 +121,6 @@ export class SelectionManager {
     };
 
     private _handleCloseMenu = (_event: object) => {
-        console.log('Closing a menu from EH...');
-
         if (this._activeMenu) {
             this._selectionMarker.removeChild(this._activeMenu);
             this._activeMenu.off('close', this._handleCloseMenu);

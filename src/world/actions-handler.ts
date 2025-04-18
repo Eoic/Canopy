@@ -53,8 +53,13 @@ export class ActionsHandler {
     };
 
     private _handleConnect = (data: InMessages[InMessageType.Connect]['message']) => {
-        if (data.isLocal)
-            this._userService.setLocalUser(data.id);
+        if (data.isLocal) {
+            this._userService.loadConnectedUsers(data.id).then(() => {
+                console.info('Users loaded.');
+            }).catch((error) => {
+                console.error('Error loading users:', error);
+            });
+        }
 
         this._userService.addUser(data);
     };

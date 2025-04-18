@@ -6,7 +6,7 @@ router = APIRouter(prefix="/api/users")
 
 
 @router.get("/")
-async def get_users():
+async def get_users(localUserId: str):
     users = []
     attrs = ["id", "position"]
     store = UserStore()
@@ -21,7 +21,7 @@ async def get_users():
 
             user_dict[attr] = getattr(user, attr)
 
-        user_dict["isLocal"] = False
+        user_dict["isLocal"] = localUserId == user_dict["id"]
         users.append(user_dict)
 
     return {"users": users}

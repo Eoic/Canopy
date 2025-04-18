@@ -13,10 +13,14 @@ export class UserService extends Service<UserRepository, UserRegistry> {
         return this._registry;
     }
 
-    public async loadUsers() {
+    public async loadConnectedUsers(localUserId: string) {
         try {
-            const users = await this._repository.fetchUsers();
-            this._registry.upsertEntities(users);
+            const users = await this._repository.fetchUsers(localUserId);
+
+            for (const user of users) {
+                if (!this.isLocalUser(user.id))
+                    this.addUser(user);
+            }
         } catch (error) {
             console.error('Failed to fetch users:', error);
         }
