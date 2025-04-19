@@ -1,8 +1,6 @@
 import { InMessages, InMessageType, InWebSocketMessage } from '../network/types/message';
 import { ConnectionManager } from '../network/connection-manager';
-import { Vector } from '../math/vector';
 import { UserService } from '../service/user-service';
-import { UserState } from '../registry/entities/user';
 
 export class ActionsHandler {
     private _userService: UserService;
@@ -69,8 +67,7 @@ export class ActionsHandler {
     };
 
     private _handlePointerPositions = (data: InMessages[InMessageType.PointerPositions]['message']) => {
-        data.positions.forEach((entity) => {
-            const position = new Vector(entity.position.x, entity.position.y);
+        data.entities.forEach((entity) => {
             const user = this._userService.getUser(entity.id);
 
             if (!user)
@@ -79,14 +76,13 @@ export class ActionsHandler {
             if (this._userService.isLocalUser(user.id))
                 return;
 
-            this._userService.updateUser(
+            this._userService.pushUserPosition(
                 entity.id,
                 {
-                    positionsBuffer: [
-                        ...user.positionsBuffer,
-                        position
-                    ],
-                } as UserState
+                    x: entity.position.x,
+                    y: entity.position.y,
+                    timestamp: entity.position.timestamp,
+                }
             );
         });
     };

@@ -24,7 +24,6 @@ export type InMessages = {
             users: Array<{
                 id: string,
                 isLocal: boolean,
-                position: { x: number, y: number,}
             }>
         }
     },
@@ -34,7 +33,6 @@ export type InMessages = {
         message: {
             id: string,
             isLocal: boolean,
-            position: { x: number, y: number, },
         }
     },
 
@@ -43,17 +41,16 @@ export type InMessages = {
         message: {
             id: string,
             isLocal: boolean,
-            position: { x: number, y: number, },
         }
     },
 
     [InMessageType.PointerPositions]: {
         type: InMessageType.PointerPositions,
         message: {
-            positions: Array<{
+            entities: Array<{
                 id: string,
                 isLocal: boolean,
-                position: { x: number, y: number }
+                position: { x: number, y: number, timestamp: number },
             }>
         }
     },
@@ -77,6 +74,7 @@ export type OutMessages = {
         message: {
             id: string,
             position: { x: number, y: number },
+            timestamp: number,
         },
     },
 };

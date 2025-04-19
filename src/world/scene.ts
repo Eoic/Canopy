@@ -35,6 +35,8 @@ export class Scene {
     private _positionConverter!: PositionConverter;
     private _userService!: UserService;
 
+    public static pageStart: number = performance.timeOrigin; 
+
     get app() {
         return this._app;
     }
@@ -197,7 +199,7 @@ export class Scene {
     private _setupEvents() {
         window.addEventListener('resize', this.handleWindowResize);
         window.addEventListener('mousedown', this.handleWindowMouseDown);
-        this._app.ticker.autoStart = false;
+        // this._app.ticker.autoStart = false;
         this._app.ticker.add(this.handleUpdate);
         this._viewport.addEventListener('pointermove', this.handlePointerMove);
     }

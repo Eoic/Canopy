@@ -13,8 +13,8 @@ user_store = UserStore()
 async def websocket(websocket: WebSocket):
     await WebSocketManager.connect(websocket)
     id = WebSocketManager.id(websocket)
-    await user_store.add_user(id, UserData(id=id, position={"x": 0, "y": 0}))
-    await WebSocketManager.send(websocket, "CONNECT", {"id": id, "isLocal": True, "position": {"x": 0, "y": 0}})
+    await user_store.add_user(id, UserData(id=id))
+    await WebSocketManager.send(websocket, "CONNECT", {"id": id, "isLocal": True})
 
     await WebSocketManager.broadcast(
         sender=websocket,
@@ -22,7 +22,6 @@ async def websocket(websocket: WebSocket):
         message={
             "id": id,
             "isLocal": False,
-            "position": {"x": 0, "y": 0},
         },
         exclude_self=True,
     )
@@ -33,7 +32,7 @@ async def websocket(websocket: WebSocket):
 
             if data["type"] == "POINTER_POSITION":
                 id = data["message"]["id"]
-                await user_store.record_user_position(id, data["message"]["position"])
+                await user_store.record_user_position(id, data["message"]["position"], data["message"]["timestamp"])
     except WebSocketDisconnect:
         id = WebSocketManager.id(websocket)
         WebSocketManager.disconnect(websocket)

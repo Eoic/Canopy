@@ -2,7 +2,8 @@ import { Service } from './service';
 import { UserRegistry } from '../registry/user-registry';
 import { UserRepository } from '../repository/user-repository';
 import { User, UserState } from '../registry/entities/user';
-import { UserDTO } from '../network/types/user';
+import { BufferedPosition, UserDTO } from '../network/types/user';
+import { Scene } from '../world/scene';
 
 export class UserService extends Service<UserRepository, UserRegistry> {
     public get repository(): UserRepository {
@@ -69,5 +70,14 @@ export class UserService extends Service<UserRepository, UserRegistry> {
 
     public removeUser(id: string) {
         this.repository.removeUser(id);
+    }
+
+    public pushUserPosition(id: string, position: BufferedPosition) {
+        const user = this.getUser(id);
+
+        if (!user)
+            return;
+
+        user.positionsBuffer.push({...position, timestamp: Scene.pageStart + performance.now() });
     }
 };

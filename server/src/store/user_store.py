@@ -1,25 +1,34 @@
 import asyncio
 from collections import deque
 from dataclasses import dataclass, field
-from typing import Union
+from typing import TypedDict, Union
+
+BUFFER_LENGTH_MS = 250
+
+
+class BufferedPosition(TypedDict):
+    x: float
+    y: float
+    timestamp: int
 
 
 @dataclass
 class UserData:
     id: str
-    position: dict[str, float] = field(default_factory=lambda: {"x": 0.0, "y": 0.0})
-    positions_buffer: deque = field(default_factory=lambda: deque(maxlen=10))
+    positions_buffer: deque[BufferedPosition] = field(default_factory=deque)
 
-    def pop_position(self) -> Union[dict[str, float], None]:
-        try:
-            position = self.positions_buffer.pop()
-            self.position = position
-            return position
-        except IndexError:
+    def pop_position(self) -> BufferedPosition | None:
+        if not self.positions_buffer:
             return None
 
-    def push_position(self, position: dict[str, float]):
-        self.positions_buffer.appendleft(position)
+        return self.positions_buffer.pop()
+
+    def push_position(self, position: BufferedPosition):
+        self.positions_buffer.append(position)
+        cutoff = position["timestamp"] - BUFFER_LENGTH_MS
+
+        while self.positions_buffer and self.positions_buffer[0]["timestamp"] < cutoff:
+            self.positions_buffer.popleft()
 
 
 class UserStore:
@@ -42,10 +51,10 @@ class UserStore:
         async with self._lock:
             return self._users.get(id)
 
-    async def record_user_position(self, id: str, position: dict[str, float]):
+    async def record_user_position(self, id: str, position: dict[str, float], timestamp: int):
         async with self._lock:
             if id in self._users:
-                self._users[id].push_position(position)
+                self._users[id].push_position({"x": position["x"], "y": position["y"], "timestamp": timestamp})
 
     async def get_all_users(self, *attrs: str) -> dict[str, UserData]:
         return self._users

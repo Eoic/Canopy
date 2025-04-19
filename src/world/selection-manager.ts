@@ -165,6 +165,7 @@ export class SelectionManager {
             message: {
                 id: localUser.id,
                 position: { ...position },
+                timestamp: Scene.pageStart + performance.now(),
             },
         });
     };

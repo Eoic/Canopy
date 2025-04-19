@@ -5,14 +5,14 @@ from fastapi import WebSocket
 
 class WebSocketManager:
     active_connections: list[WebSocket] = []
-    connection_ids: dict[WebSocket, uuid.UUID] = {}
+    connection_ids: dict[WebSocket, str] = {}
 
     @classmethod
     def id(cls, websocket: WebSocket) -> str:
         return str(cls.connection_ids.get(websocket))
 
     @classmethod
-    def get_connection_ids(cls, websocket: WebSocket, exclude_self: bool = False) -> list[uuid.UUID]:
+    def get_connection_ids(cls, websocket: WebSocket, exclude_self: bool = False) -> list[str]:
         ids = list(cls.connection_ids.values())
 
         if exclude_self:
@@ -44,4 +44,4 @@ class WebSocketManager:
             try:
                 await connection.send_json({"type": type, "message": message})
             except Exception as error:
-                print("Failed to send", error)
+                print("Failed to send:", error)

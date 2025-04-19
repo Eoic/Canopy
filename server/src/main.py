@@ -25,13 +25,15 @@ async def update_users_state(user_store: UserStore):
 
             users.append({"id": user.id, "position": position})
 
-        if users:
-            for websocket, _conn_id in connections.items():
-                await WebSocketManager.send(
-                    websocket,
-                    "POINTER_POSITIONS",
-                    {"positions": users},
-                )
+        if not users:
+            continue
+
+        for websocket in connections:
+            await WebSocketManager.send(
+                websocket,
+                "POINTER_POSITIONS",
+                {"entities": users},
+            )
 
 
 @asynccontextmanager

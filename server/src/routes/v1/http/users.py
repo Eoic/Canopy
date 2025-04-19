@@ -8,7 +8,7 @@ router = APIRouter(prefix="/api/users")
 @router.get("/")
 async def get_users(localUserId: str):
     users = []
-    attrs = ["id", "position"]
+    attrs = ["id"]
     store = UserStore()
 
     for user in (await store.get_all_users()).values():

@@ -1,19 +1,15 @@
-import { Assets, Container, Graphics, ObservablePoint, Text, TextStyle, Texture, PointData } from 'pixi.js';
+import { Assets, Container, Graphics, ObservablePoint, Text, TextStyle, Texture, PointData, Buffer } from 'pixi.js';
 import { Layer } from '../../world/layers';
-import { Tween, Interpolation } from '@tweenjs/tween.js';
 import { getUserColor } from '../../utils/user-utils';
-import { UserDTO } from '../../network/types/user';
+import { BufferedPosition, UserDTO } from '../../network/types/user';
 
 const UPDATE_INTERVAL_MS = 100;
-const TWEEN_INTERVAL_MS = UPDATE_INTERVAL_MS * 0.65;
 
 export type UserState = {
     id: string;
     isLocal: boolean;
     cursor: UserCursor;
-    positionsBuffer: PointData[];
-    positionFrom: PointData;
-    positionTo: PointData;
+    positionsBuffer: BufferedPosition[];
 };
 
 export type UserCursor = {
@@ -22,11 +18,7 @@ export type UserCursor = {
 }
 
 export class User {
-    private _tween: Tween;
     private _state: UserState;
-    private _isTweenDone: boolean = true;
-    private _fromPosition: PointData = { x: 0, y: 0 };
-    private _toPosition: PointData = { x: 0, y: 0 };
 
     get id() {
         return this._state.id;
@@ -58,34 +50,36 @@ export class User {
             id: data.id,
             isLocal: data.isLocal,
             cursor: this._createCursor(data.id, `User(${data.id})`),
-            positionsBuffer: [{ ...data.position }],
-            positionFrom: { ...data.position },
-            positionTo: { ...data.position },
+            positionsBuffer: [],
         };
+    }
 
-        this._tween = new Tween(this._fromPosition);
+    private _lerp(x0: number, x1: number, t: number) {
+        return x0 + (x1 - x0) * t;
     }
 
     public update(_deltaMs: number, scale: ObservablePoint) {
-        this._tween.update();
         this._state.cursor.name.resolution = scale._x;
 
-        if (this._isTweenDone && this._state.positionsBuffer.length > 0) {
-            this._fromPosition.x = this._state.cursor.container.position.x;
-            this._fromPosition.y = this._state.cursor.container.position.y;
+        const now = performance.timeOrigin + performance.now();
+        const renderTime = now - UPDATE_INTERVAL_MS;
+        const buffer = this._state.positionsBuffer;
+      
+        while (buffer.length >= 2 && buffer[1].timestamp < renderTime) 
+            buffer.shift();
 
-            const toPosition = this._state.positionsBuffer.shift()!;
-            this._toPosition.x = toPosition.x;
-            this._toPosition.y = toPosition.y;
-            this._isTweenDone = false;
+        if (buffer.length >= 2) {
+            const [p0, p1] = buffer;
+            const t = (renderTime - p0.timestamp) / (p1.timestamp - p0.timestamp);
+      
+            this.position = {
+                x: this._lerp(p0.x, p1.x, t),
+                y: this._lerp(p0.y, p1.y, t),
+            };
 
-            this._tween = new Tween(this._fromPosition)
-                .to(this._toPosition, TWEEN_INTERVAL_MS)
-                .interpolation(Interpolation.Linear)
-                .onUpdate((position) => this.position = position)
-                .onComplete((_position) => this._isTweenDone = true)
-                .start();
+            this._state.cursor.container.visible = true;
         }
+
     }
 
     public setData<K extends keyof UserState>(data: Pick<UserState, K>): K[] {
@@ -114,6 +108,7 @@ export class User {
         cursorContainer.addChild(nameContainer);
         cursorContainer.addChild(cursor);
         cursorContainer.zIndex = Layer.Cursor;
+        cursorContainer.visible = false;
 
         return { container: cursorContainer, name };
     }
