@@ -1,4 +1,4 @@
-import { Assets, Container, Graphics, ObservablePoint, Text, TextStyle, Texture, PointData, Buffer } from 'pixi.js';
+import { Assets, Container, Graphics, ObservablePoint, Text, TextStyle, Texture, PointData } from 'pixi.js';
 import { Layer } from '../../world/layers';
 import { getUserColor } from '../../utils/user-utils';
 import { BufferedPosition, UserDTO } from '../../network/types/user';
@@ -58,14 +58,18 @@ export class User {
         return x0 + (x1 - x0) * t;
     }
 
+    private _distance(p0: number, p1: number) {
+        return Math.abs(p1 - p0);
+    }
+
     public update(_deltaMs: number, scale: ObservablePoint) {
         this._state.cursor.name.resolution = scale._x;
 
         const now = performance.timeOrigin + performance.now();
         const renderTime = now - UPDATE_INTERVAL_MS;
         const buffer = this._state.positionsBuffer;
-      
-        while (buffer.length >= 2 && buffer[1].timestamp < renderTime) 
+
+        while (buffer.length >= 2 && buffer[1].timestamp < renderTime)
             buffer.shift();
 
         if (buffer.length >= 2) {
@@ -79,7 +83,6 @@ export class User {
 
             this._state.cursor.container.visible = true;
         }
-
     }
 
     public setData<K extends keyof UserState>(data: Pick<UserState, K>): K[] {

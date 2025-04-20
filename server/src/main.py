@@ -28,11 +28,16 @@ async def update_users_state(user_store: UserStore):
         if not users:
             continue
 
-        for websocket in connections:
+        for websocket, websocket_id in connections.items():
+            relevant_users = list(filter(lambda u: u["id"] != websocket_id, users))
+
+            if not relevant_users:
+                continue
+
             await WebSocketManager.send(
                 websocket,
                 "POINTER_POSITIONS",
-                {"entities": users},
+                {"entities": relevant_users},
             )
 
 

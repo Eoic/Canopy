@@ -56,6 +56,11 @@ class UserStore:
             if id in self._users:
                 self._users[id].push_position({"x": position["x"], "y": position["y"], "timestamp": timestamp})
 
+    async def flush_user_positions(self, id: str):
+        async with self._lock:
+            if id in self._users:
+                self._users[id].positions_buffer.clear()
+
     async def get_all_users(self, *attrs: str) -> dict[str, UserData]:
         return self._users
 

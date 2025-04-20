@@ -33,6 +33,16 @@ async def websocket(websocket: WebSocket):
             if data["type"] == "POINTER_POSITION":
                 id = data["message"]["id"]
                 await user_store.record_user_position(id, data["message"]["position"], data["message"]["timestamp"])
+            elif data["type"] == "POINTER_OUT_OF_BOUNDS":
+                id = data["message"]["id"]
+                await user_store.flush_user_positions(id)
+
+                await WebSocketManager.broadcast(
+                    sender=websocket,
+                    type="POINTER_OUT_OF_BOUNDS",
+                    message={"id": id, "timestamp": data["message"]["timestamp"]},
+                    exclude_self=True,
+                )
     except WebSocketDisconnect:
         id = WebSocketManager.id(websocket)
         WebSocketManager.disconnect(websocket)

@@ -80,4 +80,14 @@ export class UserService extends Service<UserRepository, UserRegistry> {
 
         user.positionsBuffer.push({...position, timestamp: Scene.pageStart + performance.now() });
     }
+
+    public flushUserPositions(id: string) {
+        const user = this.getUser(id);
+
+        if (!user)
+            return;
+
+        user.cursor.container.visible = false;
+        user.positionsBuffer.length = 0;
+    }
 };

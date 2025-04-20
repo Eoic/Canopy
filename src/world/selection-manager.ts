@@ -101,23 +101,28 @@ export class SelectionManager {
         }
     };
 
-    private _handleAppPointerMove = (_event: PointerEvent) => {
+    private _handleAppPointerMove = (event: PointerEvent) => {
         const localUser = this._scene.userService.getLocalUser();
 
         if (!localUser)
             return;
 
-        const worldPosition = this._scene.rawWorldToSnappedWorld(localUser.position);
+        if ((event as unknown as PIXI.FederatedPointerEvent).nativeEvent.target !== this._scene.app.canvas)
+            return;
+
+        const position = this._scene.screenToRawWorld(event as unknown as PIXI.FederatedPointerEvent);
+        const worldPosition = this._scene.rawWorldToSnappedWorld(position);
         const cellPosition = this._scene.rawWorldToCellIndex(worldPosition);
         this._currentCell.set(cellPosition.x, cellPosition.y);
         this._hoverMarker.position.set(worldPosition.x, worldPosition.y);
         this._hoverMarker.visible = true;
-        this._sendPosition(localUser.position);
+        this._sendPosition(position);
         this._positionText.innerText = `(X: ${cellPosition.x}, Y: ${cellPosition.y})`;
     };
 
     private _handleAppPointerOut = (_event: PointerEvent) => {
         this._hoverMarker.visible = false;
+        this._sendOutOfBounds();
     };
 
     private _handleCloseMenu = (_event: object) => {
@@ -169,4 +174,19 @@ export class SelectionManager {
             },
         });
     };
+
+    private _sendOutOfBounds() {
+        const localUser = this._scene.userService.getLocalUser();
+
+        if (!localUser)
+            return;
+
+        ConnectionManager.instance.send({
+            type: OutMessageType.PointerOutOfBounds,
+            message: {
+                id: localUser.id,
+                timestamp: Scene.pageStart + performance.now(),
+            },
+        }); 
+    }
 }

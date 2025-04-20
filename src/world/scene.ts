@@ -199,9 +199,7 @@ export class Scene {
     private _setupEvents() {
         window.addEventListener('resize', this.handleWindowResize);
         window.addEventListener('mousedown', this.handleWindowMouseDown);
-        // this._app.ticker.autoStart = false;
         this._app.ticker.add(this.handleUpdate);
-        this._viewport.addEventListener('pointermove', this.handlePointerMove);
     }
 
     public async loadAssets() {
@@ -240,6 +238,10 @@ export class Scene {
         return this._positionConverter.cellIndexToSnappedWorld(position);
     }
 
+    public screenToRawWorld(event: PIXI.FederatedPointerEvent): { x: number, y: number } {
+        return this._positionConverter.screenToRawWorld(event);
+    }
+
     public moveToCell(cellPosition: { x: number, y: number }) {
         this._viewport.setZoom(1, true);
         this._viewport.moveCenter(cellPosition.x * CELL_FULL_SIZE, cellPosition.y * CELL_HALF_SIZE);
@@ -255,18 +257,6 @@ export class Scene {
         this._viewport.zoom(100, true);
         this.updateBackground(this._background, { isReplaceNeeded: true });
     }
-
-    private handlePointerMove = (event: PIXI.FederatedPointerEvent) => {
-        const localUser = this._userService.getLocalUser();
-
-        if (!localUser)
-            return;
-
-        if (event.nativeEvent.target !== this._app.canvas)
-            return;
-
-        localUser.position = this._positionConverter.screenToRawWorld(event);
-    };
 
     private handleUpdate = (ticker: PIXI.Ticker) => {
         for (const user of this._userService.getUsers())

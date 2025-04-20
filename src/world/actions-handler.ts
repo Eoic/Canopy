@@ -45,6 +45,9 @@ export class ActionsHandler {
             case InMessageType.PointerPositions:
                 this._handlePointerPositions(data.message);
                 break;
+            case InMessageType.PointerOutOfBounds:
+                this._handlePointerOutOfBounds(data.message);
+                break;
             default:
                 break;
         }
@@ -85,5 +88,14 @@ export class ActionsHandler {
                 }
             );
         });
+    };
+
+    private _handlePointerOutOfBounds = (data: InMessages[InMessageType.PointerOutOfBounds]['message']) => {
+        const user = this._userService.getUser(data.id);
+
+        if (!user)
+            return;
+
+        this._userService.flushUserPositions(user.id);
     };
 };
