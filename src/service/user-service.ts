@@ -2,7 +2,7 @@ import { Service } from './service';
 import { UserRegistry } from '../registry/user-registry';
 import { UserRepository } from '../repository/user-repository';
 import { User, UserState } from '../registry/entities/user';
-import { BufferedPosition, UserDTO } from '../network/types/user';
+import { BufferedEvent, PositionEvent, UserDTO } from '../network/types/user';
 import { Scene } from '../world/scene';
 
 export class UserService extends Service<UserRepository, UserRegistry> {
@@ -72,22 +72,12 @@ export class UserService extends Service<UserRepository, UserRegistry> {
         this.repository.removeUser(id);
     }
 
-    public pushUserPosition(id: string, position: BufferedPosition) {
+    public pushEvent(id: string, event: BufferedEvent) {
         const user = this.getUser(id);
 
         if (!user)
             return;
 
-        user.positionsBuffer.push({...position, timestamp: Scene.pageStart + performance.now() });
-    }
-
-    public flushUserPositions(id: string) {
-        const user = this.getUser(id);
-
-        if (!user)
-            return;
-
-        user.cursor.container.visible = false;
-        user.positionsBuffer.length = 0;
+        user.eventsBuffer.push({ ...event, timestamp: Scene.pageStart + performance.now() });
     }
 };

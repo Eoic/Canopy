@@ -122,7 +122,7 @@ export class SelectionManager {
 
     private _handleAppPointerOut = (_event: PointerEvent) => {
         this._hoverMarker.visible = false;
-        this._sendOutOfBounds();
+        this._sendPointerOut();
     };
 
     private _handleCloseMenu = (_event: object) => {
@@ -175,14 +175,14 @@ export class SelectionManager {
         });
     };
 
-    private _sendOutOfBounds() {
+    private _sendPointerOut() {
         const localUser = this._scene.userService.getLocalUser();
 
         if (!localUser)
             return;
 
         ConnectionManager.instance.send({
-            type: OutMessageType.PointerOutOfBounds,
+            type: OutMessageType.PointerOut,
             message: {
                 id: localUser.id,
                 timestamp: Scene.pageStart + performance.now(),

@@ -1,6 +1,7 @@
 import { InMessages, InMessageType, InWebSocketMessage } from '../network/types/message';
 import { ConnectionManager } from '../network/connection-manager';
 import { UserService } from '../service/user-service';
+import { EventType } from '../network/types/user';
 
 export class ActionsHandler {
     private _userService: UserService;
@@ -45,8 +46,8 @@ export class ActionsHandler {
             case InMessageType.PointerPositions:
                 this._handlePointerPositions(data.message);
                 break;
-            case InMessageType.PointerOutOfBounds:
-                this._handlePointerOutOfBounds(data.message);
+            case InMessageType.PointerOut:
+                this._handlePointerOut(data.message);
                 break;
             default:
                 break;
@@ -79,23 +80,30 @@ export class ActionsHandler {
             if (this._userService.isLocalUser(user.id))
                 return;
 
-            this._userService.pushUserPosition(
+            this._userService.pushEvent(
                 entity.id,
                 {
                     x: entity.position.x,
                     y: entity.position.y,
+                    type: EventType.POSITION,
                     timestamp: entity.position.timestamp,
                 }
             );
         });
     };
 
-    private _handlePointerOutOfBounds = (data: InMessages[InMessageType.PointerOutOfBounds]['message']) => {
+    private _handlePointerOut = (data: InMessages[InMessageType.PointerOut]['message']) => {
         const user = this._userService.getUser(data.id);
 
         if (!user)
             return;
 
-        this._userService.flushUserPositions(user.id);
+        this._userService.pushEvent(
+            user.id,
+            {
+                type: EventType.POINTER_OUT,
+                timestamp: data.timestamp,
+            }
+        );
     };
 };

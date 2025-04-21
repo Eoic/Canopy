@@ -1,7 +1,7 @@
 import { Assets, Container, Graphics, ObservablePoint, Text, TextStyle, Texture, PointData } from 'pixi.js';
 import { Layer } from '../../world/layers';
 import { getUserColor } from '../../utils/user-utils';
-import { BufferedPosition, UserDTO } from '../../network/types/user';
+import { BufferedEvent, EventsBuffer, EventType, UserDTO } from '../../network/types/user';
 
 const UPDATE_INTERVAL_MS = 100;
 
@@ -9,7 +9,7 @@ export type UserState = {
     id: string;
     isLocal: boolean;
     cursor: UserCursor;
-    positionsBuffer: BufferedPosition[];
+    eventsBuffer: EventsBuffer;
 };
 
 export type UserCursor = {
@@ -20,11 +20,11 @@ export type UserCursor = {
 export class User {
     private _state: UserState;
 
-    get id() {
+    get id(): string {
         return this._state.id;
     }
 
-    get position() {
+    get position(): Readonly<PointData> {
         const point = this._state.cursor.container.position;
 
         return {
@@ -37,29 +37,25 @@ export class User {
         this._state.cursor.container.position.copyFrom(value);
     }
 
-    get positionsBuffer() {
-        return this._state.positionsBuffer;
+    get eventsBuffer(): EventsBuffer {
+        return this._state.eventsBuffer;
     }
 
-    get cursor() {
+    get cursor(): UserCursor {
         return this._state.cursor;
     }
 
     constructor(data: UserDTO) {
         this._state = {
             id: data.id,
+            eventsBuffer: [],
             isLocal: data.isLocal,
             cursor: this._createCursor(data.id, `User(${data.id})`),
-            positionsBuffer: [],
         };
     }
 
-    private _lerp(x0: number, x1: number, t: number) {
+    private _lerp(x0: number, x1: number, t: number): number {
         return x0 + (x1 - x0) * t;
-    }
-
-    private _distance(p0: number, p1: number) {
-        return Math.abs(p1 - p0);
     }
 
     public update(_deltaMs: number, scale: ObservablePoint) {
@@ -67,7 +63,26 @@ export class User {
 
         const now = performance.timeOrigin + performance.now();
         const renderTime = now - UPDATE_INTERVAL_MS;
-        const buffer = this._state.positionsBuffer;
+        const buffer = this._state.eventsBuffer;
+
+        buffer.sort((a, b) => {
+            if (a.timestamp === b.timestamp)
+                return a.type === EventType.POINTER_OUT ? 1 : -1;
+
+            return a.timestamp - b.timestamp;
+        });
+
+        if (buffer.length > 0 && buffer[0].type === EventType.POINTER_OUT) {
+            this._state.cursor.container.visible = false;
+            buffer.shift();
+            return;
+        }
+
+        if (buffer.length > 1 && buffer[1].type === EventType.POINTER_OUT) {
+            this._state.cursor.container.visible = false;
+            buffer.shift();
+            return;
+        }
 
         while (buffer.length >= 2 && buffer[1].timestamp < renderTime)
             buffer.shift();
@@ -75,7 +90,7 @@ export class User {
         if (buffer.length >= 2) {
             const [p0, p1] = buffer;
             const t = (renderTime - p0.timestamp) / (p1.timestamp - p0.timestamp);
-      
+
             this.position = {
                 x: this._lerp(p0.x, p1.x, t),
                 y: this._lerp(p0.y, p1.y, t),
@@ -116,7 +131,7 @@ export class User {
         return { container: cursorContainer, name };
     }
 
-    private _createName(text: string) {
+    private _createName(text: string): Text {
         const style = new TextStyle({ fill: 0xFFFFFF, fontSize: 11, letterSpacing: 1 });
         return new Text({ text, style, anchor: { x: 0.5, y: 0.5 } });
     }

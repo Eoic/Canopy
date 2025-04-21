@@ -6,13 +6,13 @@ export enum InMessageType {
     Connect = 'CONNECT',
     Disconnect = 'DISCONNECT',
     PointerPositions = 'POINTER_POSITIONS',
-    PointerOutOfBounds = 'POINTER_OUT_OF_BOUNDS',
+    PointerOut = 'POINTER_OUT_OF_BOUNDS',
 };
 
 export enum OutMessageType {
     SwitchCell = 'SWITCH_CELL',
     PointerPosition = 'POINTER_POSITION',
-    PointerOutOfBounds = 'POINTER_OUT_OF_BOUNDS',
+    PointerOut = 'POINTER_OUT',
 };
 
 /**
@@ -57,8 +57,8 @@ export type InMessages = {
         }
     },
 
-    [InMessageType.PointerOutOfBounds]: {
-        type: InMessageType.PointerOutOfBounds,
+    [InMessageType.PointerOut]: {
+        type: InMessageType.PointerOut,
         message: {
             id: string,
             timestamp: number,
@@ -88,8 +88,8 @@ export type OutMessages = {
         },
     },
 
-    [OutMessageType.PointerOutOfBounds]: {
-        type: OutMessageType.PointerOutOfBounds,
+    [OutMessageType.PointerOut]: {
+        type: OutMessageType.PointerOut,
         message: {
             id: string,
             timestamp: number,
