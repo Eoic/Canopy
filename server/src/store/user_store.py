@@ -1,34 +1,16 @@
 import asyncio
-from collections import deque
 from dataclasses import dataclass, field
-from typing import TypedDict, Union
+from typing import Any, Union
 
-BUFFER_LENGTH_MS = 250
+from server.src.events.buffer import BufferedEvent, EventsBuffer
 
-
-class BufferedPosition(TypedDict):
-    x: float
-    y: float
-    timestamp: int
+BUFFER_SIZE_MS = 250
 
 
 @dataclass
 class UserData:
     id: str
-    positions_buffer: deque[BufferedPosition] = field(default_factory=deque)
-
-    def pop_position(self) -> BufferedPosition | None:
-        if not self.positions_buffer:
-            return None
-
-        return self.positions_buffer.pop()
-
-    def push_position(self, position: BufferedPosition):
-        self.positions_buffer.append(position)
-        cutoff = position["timestamp"] - BUFFER_LENGTH_MS
-
-        while self.positions_buffer and self.positions_buffer[0]["timestamp"] < cutoff:
-            self.positions_buffer.popleft()
+    events_buffer: EventsBuffer = field(default_factory=lambda: EventsBuffer(BUFFER_SIZE_MS))
 
 
 class UserStore:
@@ -51,17 +33,30 @@ class UserStore:
         async with self._lock:
             return self._users.get(id)
 
-    async def record_user_position(self, id: str, position: dict[str, float], timestamp: int):
+    async def record_user_action(self, id: str, name: str, payload: dict[str, Any], is_transient: bool):
         async with self._lock:
             if id in self._users:
-                self._users[id].push_position({"x": position["x"], "y": position["y"], "timestamp": timestamp})
+                user = self._users[id]
 
-    async def flush_user_positions(self, id: str):
+                user.events_buffer.push(
+                    BufferedEvent(
+                        name=name,
+                        event_id=f"{payload['name']}-{payload['timestamp']}",
+                        timestamp=payload["timestamp"],
+                        is_transient=is_transient,
+                        data=payload["data"],
+                    )
+                )
+
+    async def consume_latest_events(self, id: str):
         async with self._lock:
             if id in self._users:
-                self._users[id].positions_buffer.clear()
+                user = self._users[id]
+                return user.events_buffer.drain()
 
-    async def get_all_users(self, *attrs: str) -> dict[str, UserData]:
+            return []
+
+    async def get_users(self, *attrs: str) -> dict[str, UserData]:
         return self._users
 
     async def remove_user(self, id: str):

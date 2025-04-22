@@ -10,20 +10,20 @@ from store.user_store import UserStore
 from utils.websocket import WebSocketManager
 
 
-async def update_users_state(user_store: UserStore):
+async def broadcast_state(user_store: UserStore):
     while True:
         await asyncio.sleep(0.1)
 
         users = []
         connections = WebSocketManager.connection_ids
 
-        for user in (await user_store.get_all_users()).values():
-            position = user.pop_position()
+        for user in (await user_store.get_users()).values():
+            events = await user_store.consume_latest_events(user.id)
 
-            if not position:
+            if not events:
                 continue
 
-            users.append({"id": user.id, "position": position})
+            users.append({"id": user.id, "events": events})
 
         if not users:
             continue
@@ -34,18 +34,14 @@ async def update_users_state(user_store: UserStore):
             if not relevant_users:
                 continue
 
-            await WebSocketManager.send(
-                websocket,
-                "POINTER_POSITIONS",
-                {"entities": relevant_users},
-            )
+            await WebSocketManager.send(websocket, "STATE", {"entities": relevant_users})
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Database.init()
     user_store = UserStore()
-    asyncio.create_task(update_users_state(user_store))
+    asyncio.create_task(broadcast_state(user_store))
     yield
 
 

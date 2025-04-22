@@ -1,5 +1,3 @@
-import asyncio
-
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from store.user_store import UserData, UserStore
@@ -28,20 +26,15 @@ async def websocket(websocket: WebSocket):
 
     try:
         while True:
+            is_transient = False
             data = await websocket.receive_json()
 
-            if data["type"] == "POINTER_POSITION":
-                id = data["message"]["id"]
-                await user_store.record_user_position(id, data["message"]["position"], data["message"]["timestamp"])
-            elif data["type"] == "POINTER_OUT":
-                id = data["message"]["id"]
+            if data["name"] == "POINTER_POSITION":
+                is_transient = True
+            elif data["name"] == "POINTER_OUT":
+                is_transient = False
 
-                await WebSocketManager.broadcast(
-                    sender=websocket,
-                    type="POINTER_OUT",
-                    message={"id": id, "timestamp": data["message"]["timestamp"]},
-                    exclude_self=True,
-                )
+            await user_store.record_user_action(id, data["name"], data["message"], is_transient)
     except WebSocketDisconnect:
         id = WebSocketManager.id(websocket)
         WebSocketManager.disconnect(websocket)
