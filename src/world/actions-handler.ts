@@ -1,7 +1,6 @@
 import { InMessages, InMessageType, InWebSocketMessage } from '../network/types/message';
 import { ConnectionManager } from '../network/connection-manager';
 import { UserService } from '../service/user-service';
-import { EventType } from '../network/types/user';
 
 export class ActionsHandler {
     private _userService: UserService;
@@ -36,18 +35,15 @@ export class ActionsHandler {
     }
 
     private _handleActions = (data: InWebSocketMessage) => {
-        switch (data.type) {
+        switch (data.name) {
             case InMessageType.Connect:
                 this._handleConnect(data.message);
                 break;
             case InMessageType.Disconnect:
                 this._handleDisconnect(data.message);
                 break;
-            case InMessageType.PointerPositions:
-                this._handlePointerPositions(data.message);
-                break;
-            case InMessageType.PointerOut:
-                this._handlePointerOut(data.message);
+            case InMessageType.State:
+                this._handleState(data.message);
                 break;
             default:
                 break;
@@ -70,7 +66,7 @@ export class ActionsHandler {
         this._userService.removeUser(data.id);
     };
 
-    private _handlePointerPositions = (data: InMessages[InMessageType.PointerPositions]['message']) => {
+    private _handleState = (data: InMessages[InMessageType.State]['message']) => {
         data.entities.forEach((entity) => {
             const user = this._userService.getUser(entity.id);
 
@@ -80,30 +76,10 @@ export class ActionsHandler {
             if (this._userService.isLocalUser(user.id))
                 return;
 
-            this._userService.pushEvent(
-                entity.id,
-                {
-                    x: entity.position.x,
-                    y: entity.position.y,
-                    type: EventType.POSITION,
-                    timestamp: entity.position.timestamp,
-                }
-            );
+            // FIXME: Is the order of events correct?
+            entity.events.forEach((event) => {
+                this._userService.pushEvent(entity.id, event);
+            });
         });
-    };
-
-    private _handlePointerOut = (data: InMessages[InMessageType.PointerOut]['message']) => {
-        const user = this._userService.getUser(data.id);
-
-        if (!user)
-            return;
-
-        this._userService.pushEvent(
-            user.id,
-            {
-                type: EventType.POINTER_OUT,
-                timestamp: data.timestamp,
-            }
-        );
     };
 };

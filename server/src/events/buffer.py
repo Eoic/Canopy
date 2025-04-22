@@ -46,7 +46,7 @@ class EventsBuffer:
 
     def drain(self):
         """Drains all events from the buffer and returns them as a list."""
-        events = list(self._events.values())
+        events = [item.__dict__ for item in self._events.values()]
         self._events.clear()
         return events
 
@@ -60,7 +60,7 @@ class EventsBuffer:
         threshold = self._max_ts - self.window_size_ms
 
         for id in list(self._events):
-            timestamp, is_transient = itemgetter("timestamp", "is_transient")(self._events[id])
+            timestamp, is_transient = itemgetter("timestamp", "is_transient")(self._events[id].__dict__)
 
             if not is_transient:
                 continue

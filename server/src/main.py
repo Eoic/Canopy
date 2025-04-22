@@ -29,7 +29,7 @@ async def broadcast_state(user_store: UserStore):
             continue
 
         for websocket, websocket_id in connections.items():
-            relevant_users = list(filter(lambda u: u["id"] != websocket_id, users))
+            relevant_users = list(filter(lambda user: user["id"] != websocket_id, users))
 
             if not relevant_users:
                 continue

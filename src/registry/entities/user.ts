@@ -1,7 +1,8 @@
 import { Assets, Container, Graphics, ObservablePoint, Text, TextStyle, Texture, PointData } from 'pixi.js';
 import { Layer } from '../../world/layers';
 import { getUserColor } from '../../utils/user-utils';
-import { BufferedEvent, EventsBuffer, EventType, UserDTO } from '../../network/types/user';
+import { EventsBuffer, UserDTO } from '../../network/types/user';
+import { PointerPositionEvent } from '../../network/types/message';
 
 const UPDATE_INTERVAL_MS = 100;
 
@@ -64,36 +65,44 @@ export class User {
         const now = performance.timeOrigin + performance.now();
         const renderTime = now - UPDATE_INTERVAL_MS;
         const buffer = this._state.eventsBuffer;
+        
+        // buffer.sort((a, b) => {
+        //     if (a.timestamp === b.timestamp)
+        //         return a.type === EventType.POINTER_OUT ? 1 : -1;
 
-        buffer.sort((a, b) => {
-            if (a.timestamp === b.timestamp)
-                return a.type === EventType.POINTER_OUT ? 1 : -1;
+        //     return a.timestamp - b.timestamp;
+        // });
 
-            return a.timestamp - b.timestamp;
-        });
+        // if (buffer.length > 0 && buffer[0].type === EventType.POINTER_OUT) {
+        //     this._state.cursor.container.visible = false;
+        //     buffer.shift();
+        //     return;
+        // }
 
-        if (buffer.length > 0 && buffer[0].type === EventType.POINTER_OUT) {
-            this._state.cursor.container.visible = false;
-            buffer.shift();
-            return;
-        }
-
-        if (buffer.length > 1 && buffer[1].type === EventType.POINTER_OUT) {
-            this._state.cursor.container.visible = false;
-            buffer.shift();
-            return;
-        }
+        // if (buffer.length > 1 && buffer[1].type === EventType.POINTER_OUT) {
+        //     this._state.cursor.container.visible = false;
+        //     buffer.shift();
+        //     return;
+        // }
 
         while (buffer.length >= 2 && buffer[1].timestamp < renderTime)
             buffer.shift();
 
         if (buffer.length >= 2) {
             const [p0, p1] = buffer;
-            const t = (renderTime - p0.timestamp) / (p1.timestamp - p0.timestamp);
+            const time = (renderTime - p0.timestamp) / (p1.timestamp - p0.timestamp);
 
             this.position = {
-                x: this._lerp(p0.x, p1.x, t),
-                y: this._lerp(p0.y, p1.y, t),
+                x: this._lerp(
+                    (p0 as PointerPositionEvent).data.position.x,
+                    (p1 as PointerPositionEvent).data.position.x,
+                    time
+                ),
+                y: this._lerp(
+                    (p0 as PointerPositionEvent).data.position.y,
+                    (p1 as PointerPositionEvent).data.position.y,
+                    time
+                ),
             };
 
             this._state.cursor.container.visible = true;

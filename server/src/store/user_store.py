@@ -2,7 +2,7 @@ import asyncio
 from dataclasses import dataclass, field
 from typing import Any, Union
 
-from server.src.events.buffer import BufferedEvent, EventsBuffer
+from events.buffer import BufferedEvent, EventsBuffer
 
 BUFFER_SIZE_MS = 250
 
@@ -41,10 +41,10 @@ class UserStore:
                 user.events_buffer.push(
                     BufferedEvent(
                         name=name,
-                        event_id=f"{payload['name']}-{payload['timestamp']}",
+                        event_id=f"{name}-{payload['timestamp']}",
                         timestamp=payload["timestamp"],
                         is_transient=is_transient,
-                        data=payload["data"],
+                        data=payload.get("data") or {},
                     )
                 )
 

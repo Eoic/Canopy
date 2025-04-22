@@ -32,16 +32,16 @@ class WebSocketManager:
         cls.connection_ids.pop(websocket)
 
     @classmethod
-    async def send(cls, websocket: WebSocket, type: str, message: object):
-        await websocket.send_json({"type": type, "message": message})
+    async def send(cls, websocket: WebSocket, name: str, message: object):
+        await websocket.send_json({"name": name, "message": message})
 
     @classmethod
-    async def broadcast(cls, sender: WebSocket, type: str, message: object, exclude_self: bool = False):
+    async def broadcast(cls, sender: WebSocket, name: str, message: object, exclude_self: bool = False):
         for connection in cls.active_connections:
             if exclude_self and sender == connection:
                 continue
 
             try:
-                await connection.send_json({"type": type, "message": message})
+                await connection.send_json({"name": name, "message": message})
             except Exception as error:
                 print("Failed to send:", error)

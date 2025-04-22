@@ -92,7 +92,7 @@ export class ConnectionManager {
         if (!this._callbacks[event])
             this._callbacks[event] = [];
 
-        this._callbacks[event].push(callback);
+        this._callbacks[event].push(callback); // Ignore for now.
     }
 
     public off<T extends keyof Callbacks>(event: T, callback: Flatten<Callbacks[T]>) {

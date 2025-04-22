@@ -5,7 +5,7 @@ export enum InMessageType {
     Users = 'USERS',
     Connect = 'CONNECT',
     Disconnect = 'DISCONNECT',
-    PointerPositions = 'POINTER_POSITIONS',
+    State = 'STATE',
     PointerOut = 'POINTER_OUT_OF_BOUNDS',
 };
 
@@ -15,13 +15,35 @@ export enum OutMessageType {
     PointerOut = 'POINTER_OUT',
 };
 
+export type GenericEvent = {
+    event_id: string,
+    timestamp: number,
+    is_transient: boolean,
+};
+
+export type PointerPositionEvent = {
+    name: 'POINTER_POSITION',
+    data: {
+        position: {
+            x: number,
+            y: number
+        }
+    }
+} & GenericEvent;
+
+export type PointerOutEvent = {
+    name: 'POINTER_OUT',
+} & GenericEvent;
+
+export type BufferedEvent = PointerPositionEvent | PointerOutEvent;
+
 /**
  * Defines message message types coming
  * from the server over WebSocket connection.
  */
 export type InMessages = {
     [InMessageType.Users]: {
-        type: InMessageType.Users,
+        name: InMessageType.Users,
         message: {
             users: Array<{
                 id: string,
@@ -31,7 +53,7 @@ export type InMessages = {
     },
 
     [InMessageType.Connect]: {
-        type: InMessageType.Connect,
+        name: InMessageType.Connect,
         message: {
             id: string,
             isLocal: boolean,
@@ -39,26 +61,25 @@ export type InMessages = {
     },
 
     [InMessageType.Disconnect]: {
-        type: InMessageType.Disconnect,
+        name: InMessageType.Disconnect,
         message: {
             id: string,
             isLocal: boolean,
         }
     },
 
-    [InMessageType.PointerPositions]: {
-        type: InMessageType.PointerPositions,
+    [InMessageType.State]: {
+        name: InMessageType.State,
         message: {
             entities: Array<{
                 id: string,
-                isLocal: boolean,
-                position: { x: number, y: number, timestamp: number },
+                events: Array<BufferedEvent>,
             }>
         }
     },
 
     [InMessageType.PointerOut]: {
-        type: InMessageType.PointerOut,
+        name: InMessageType.PointerOut,
         message: {
             id: string,
             timestamp: number,
@@ -72,7 +93,7 @@ export type InMessages = {
  */
 export type OutMessages = {
     [OutMessageType.SwitchCell]: {
-        type: OutMessageType.SwitchCell,
+        name: OutMessageType.SwitchCell,
         message: {
             prevCell: { x: number, y: number } | null,
             nextCell: { x: number, y: number } | null,
@@ -80,16 +101,18 @@ export type OutMessages = {
     },
 
     [OutMessageType.PointerPosition]: {
-        type: OutMessageType.PointerPosition
+        name: OutMessageType.PointerPosition
         message: {
             id: string,
-            position: { x: number, y: number },
             timestamp: number,
+            data: {
+                position: { x: number, y: number },
+            }
         },
     },
 
     [OutMessageType.PointerOut]: {
-        type: OutMessageType.PointerOut,
+        name: OutMessageType.PointerOut,
         message: {
             id: string,
             timestamp: number,

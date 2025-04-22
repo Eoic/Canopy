@@ -16,7 +16,7 @@ async def websocket(websocket: WebSocket):
 
     await WebSocketManager.broadcast(
         sender=websocket,
-        type="CONNECT",
+        name="CONNECT",
         message={
             "id": id,
             "isLocal": False,
@@ -33,6 +33,14 @@ async def websocket(websocket: WebSocket):
                 is_transient = True
             elif data["name"] == "POINTER_OUT":
                 is_transient = False
+
+            # Structure:
+            # {
+            #   name
+            #   message
+            #     data
+            #     timestamp
+            # }
 
             await user_store.record_user_action(id, data["name"], data["message"], is_transient)
     except WebSocketDisconnect:

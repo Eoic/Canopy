@@ -122,7 +122,7 @@ export class SelectionManager {
 
     private _handleAppPointerOut = (_event: PointerEvent) => {
         this._hoverMarker.visible = false;
-        this._sendPointerOut();
+        // this._sendPointerOut();
     };
 
     private _handleCloseMenu = (_event: object) => {
@@ -166,11 +166,13 @@ export class SelectionManager {
             return;
 
         ConnectionManager.instance.send({
-            type: OutMessageType.PointerPosition,
+            name: OutMessageType.PointerPosition,
             message: {
                 id: localUser.id,
-                position: { ...position },
                 timestamp: Scene.pageStart + performance.now(),
+                data: {
+                    position: { ...position },
+                },
             },
         });
     };
@@ -182,7 +184,7 @@ export class SelectionManager {
             return;
 
         ConnectionManager.instance.send({
-            type: OutMessageType.PointerOut,
+            name: OutMessageType.PointerOut,
             message: {
                 id: localUser.id,
                 timestamp: Scene.pageStart + performance.now(),

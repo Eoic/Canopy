@@ -11,7 +11,7 @@ async def get_users(localUserId: str):
     attrs = ["id"]
     store = UserStore()
 
-    for user in (await store.get_all_users()).values():
+    for user in (await store.get_users()).values():
         user_dict = {}
 
         for attr in attrs:
