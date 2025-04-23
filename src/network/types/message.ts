@@ -12,6 +12,7 @@ export enum InMessageType {
 export enum OutMessageType {
     SwitchCell = 'SWITCH_CELL',
     PointerPosition = 'POINTER_POSITION',
+    PointerEnter = 'POINTER_ENTER',
     PointerOut = 'POINTER_OUT',
 };
 
@@ -31,11 +32,15 @@ export type PointerPositionEvent = {
     }
 } & GenericEvent;
 
+export type PointerEnterEvent = {
+    name: 'POINTER_ENTER',
+} & GenericEvent;
+
 export type PointerOutEvent = {
     name: 'POINTER_OUT',
 } & GenericEvent;
 
-export type BufferedEvent = PointerPositionEvent | PointerOutEvent;
+export type BufferedEvent = PointerPositionEvent | PointerOutEvent | PointerEnterEvent;
 
 /**
  * Defines message message types coming
@@ -109,6 +114,14 @@ export type OutMessages = {
                 position: { x: number, y: number },
             }
         },
+    },
+
+    [OutMessageType.PointerEnter]: {
+        name: OutMessageType.PointerEnter,
+        message: {
+            id: string,
+            timestamp: number,
+        }
     },
 
     [OutMessageType.PointerOut]: {

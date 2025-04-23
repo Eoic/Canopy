@@ -12,7 +12,7 @@ from utils.websocket import WebSocketManager
 
 async def broadcast_state(user_store: UserStore):
     while True:
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(0.05)
 
         users = []
         connections = WebSocketManager.connection_ids

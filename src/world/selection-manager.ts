@@ -31,6 +31,7 @@ export class SelectionManager {
             'pointerdown': this._handleAppPointerDown as EventListener,
             'pointerup': this._handleAppPointerUp as EventListener,
             'pointermove': this._handleAppPointerMove as EventListener,
+            'pointerenter': this._handleAppPointerEnter as EventListener,
             'pointerout': this._handleAppPointerOut as EventListener,
         };
     }
@@ -120,9 +121,13 @@ export class SelectionManager {
         this._positionText.innerText = `(X: ${cellPosition.x}, Y: ${cellPosition.y})`;
     };
 
+    private _handleAppPointerEnter = (_event: PointerEvent) => {
+        this._sendPointerEvent(OutMessageType.PointerEnter);
+    };
+
     private _handleAppPointerOut = (_event: PointerEvent) => {
         this._hoverMarker.visible = false;
-        // this._sendPointerOut();
+        this._sendPointerEvent(OutMessageType.PointerOut);
     };
 
     private _handleCloseMenu = (_event: object) => {
@@ -177,14 +182,14 @@ export class SelectionManager {
         });
     };
 
-    private _sendPointerOut() {
+    private _sendPointerEvent(name: (OutMessageType.PointerOut | OutMessageType.PointerEnter)) {
         const localUser = this._scene.userService.getLocalUser();
 
         if (!localUser)
             return;
 
         ConnectionManager.instance.send({
-            name: OutMessageType.PointerOut,
+            name,
             message: {
                 id: localUser.id,
                 timestamp: Scene.pageStart + performance.now(),

@@ -2,7 +2,7 @@ import { Assets, Container, Graphics, ObservablePoint, Text, TextStyle, Texture,
 import { Layer } from '../../world/layers';
 import { getUserColor } from '../../utils/user-utils';
 import { EventsBuffer, UserDTO } from '../../network/types/user';
-import { PointerPositionEvent } from '../../network/types/message';
+import { PointerPositionEvent, PointerEnterEvent, PointerOutEvent } from '../../network/types/message';
 
 const UPDATE_INTERVAL_MS = 100;
 
@@ -65,19 +65,32 @@ export class User {
         const now = performance.timeOrigin + performance.now();
         const renderTime = now - UPDATE_INTERVAL_MS;
         const buffer = this._state.eventsBuffer;
-        
-        // buffer.sort((a, b) => {
-        //     if (a.timestamp === b.timestamp)
-        //         return a.type === EventType.POINTER_OUT ? 1 : -1;
 
-        //     return a.timestamp - b.timestamp;
-        // });
+        // If there is no pair of position events, we cannot interpolate.
+        if (buffer.length >= 2) {
+            if (buffer[0].name === 'POINTER_POSITION' && buffer[1].name !== 'POINTER_POSITION') {
+                const event = buffer.shift() as PointerPositionEvent;
 
-        // if (buffer.length > 0 && buffer[0].type === EventType.POINTER_OUT) {
-        //     this._state.cursor.container.visible = false;
-        //     buffer.shift();
-        //     return;
-        // }
+                this.position = {
+                    x: event.data.position.x,
+                    y: event.data.position.y,
+                };
+            }
+        }
+
+        // Apply non-interpolated events one by one.
+        if (buffer.length > 0) {
+            switch (buffer[0].name) {
+                case 'POINTER_ENTER':
+                    this._state.cursor.container.visible = true;
+                    buffer.shift();
+                    break;
+                case 'POINTER_OUT':
+                    this._state.cursor.container.visible = false;
+                    buffer.shift();
+                    break;
+            }
+        }
 
         // if (buffer.length > 1 && buffer[1].type === EventType.POINTER_OUT) {
         //     this._state.cursor.container.visible = false;
@@ -85,27 +98,33 @@ export class User {
         //     return;
         // }
 
-        while (buffer.length >= 2 && buffer[1].timestamp < renderTime)
-            buffer.shift();
+        while (
+            buffer.length >= 2 &&
+            buffer[1].timestamp < renderTime &&
+            buffer[0].name === 'POINTER_POSITION' &&
+            buffer[1].name === 'POINTER_POSITION'
+        ) buffer.shift();
 
         if (buffer.length >= 2) {
             const [p0, p1] = buffer;
+
+            if (p0.name !== 'POINTER_POSITION' || p1.name !== 'POINTER_POSITION')
+                return;
+
             const time = (renderTime - p0.timestamp) / (p1.timestamp - p0.timestamp);
 
             this.position = {
                 x: this._lerp(
-                    (p0 as PointerPositionEvent).data.position.x,
-                    (p1 as PointerPositionEvent).data.position.x,
+                    p0.data.position.x,
+                    p1.data.position.x,
                     time
                 ),
                 y: this._lerp(
-                    (p0 as PointerPositionEvent).data.position.y,
-                    (p1 as PointerPositionEvent).data.position.y,
+                    p0.data.position.y,
+                    p1.data.position.y,
                     time
                 ),
             };
-
-            this._state.cursor.container.visible = true;
         }
     }
 
