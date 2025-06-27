@@ -76,7 +76,6 @@ export class ActionsHandler {
             if (this._userService.isLocalUser(user.id))
                 return;
 
-            // FIXME: Is the order of events correct?
             entity.events.forEach((event) => {
                 this._userService.pushEvent(entity.id, event);
             });

@@ -73,7 +73,7 @@ export class Scene {
                     if (this._userService.isLocalUser(entity.id))
                         return;
 
-                    this._viewport.addChild(entity.cursor.container);
+                    // this._viewport.addChild(entity.cursor.container);
                 }
             });
 
@@ -82,7 +82,7 @@ export class Scene {
                     if (this._userService.isLocalUser(entity.id))
                         return;
 
-                    this.viewport.removeChild(entity.cursor.container);
+                    // this.viewport.removeChild(entity.cursor.container);
                 }
             });
 
@@ -259,8 +259,8 @@ export class Scene {
     }
 
     private handleUpdate = (ticker: PIXI.Ticker) => {
-        for (const user of this._userService.getUsers())
-            user.update(ticker.deltaMS, this._viewport.scale);
+        // for (const user of this._userService.getUsers())
+        // user.update(ticker.deltaMS, this._viewport.scale);
     };
 
     private handleWindowResize = () => {

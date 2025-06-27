@@ -25,4 +25,4 @@ export const BUTTON = {
 };
 
 // Network.
-export const POSITION_UPDATE_THROTTLE_MS = 100;
+// export const POSITION_UPDATE_THROTTLE_MS = 100;

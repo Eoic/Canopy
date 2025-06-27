@@ -6,7 +6,7 @@ import { throttle } from 'throttle-debounce';
 import { RadialMenu } from '../ui/radial-menu';
 import { OutMessageType } from '../network/types/message';
 import { ConnectionManager } from '../network/connection-manager';
-import { CELL_SIZE, CELL_LINE_WIDTH, CELL_COLOR, CELL_FULL_SIZE, POSITION_UPDATE_THROTTLE_MS } from '../constants';
+import { CELL_SIZE, CELL_LINE_WIDTH, CELL_COLOR, CELL_FULL_SIZE } from '../constants';
 import { PointData } from 'pixi.js';
 
 export class SelectionManager {
@@ -24,7 +24,7 @@ export class SelectionManager {
         this._scene = scene;
         this._selectionMarker = this._setupMarker(CELL_COLOR.SELECTION_FILL, Layer.SelectionCell);
         this._hoverMarker = this._setupMarker(CELL_COLOR.HOVER_FILL, Layer.HoverCell);
-        this._sendPosition = throttle(POSITION_UPDATE_THROTTLE_MS, this._sendPosition);
+        // this._sendPosition = throttle(POSITION_UPDATE_THROTTLE_MS, this._sendPosition);
         this._positionText = document.getElementById('position') as HTMLParagraphElement;
 
         this._events = {
@@ -117,17 +117,17 @@ export class SelectionManager {
         this._currentCell.set(cellPosition.x, cellPosition.y);
         this._hoverMarker.position.set(worldPosition.x, worldPosition.y);
         this._hoverMarker.visible = true;
-        this._sendPosition(position);
+        // this._sendPosition(position);
         this._positionText.innerText = `(X: ${cellPosition.x}, Y: ${cellPosition.y})`;
     };
 
     private _handleAppPointerEnter = (_event: PointerEvent) => {
-        this._sendPointerEvent(OutMessageType.PointerEnter);
+        // this._sendPointerEvent(OutMessageType.PointerEnter);
     };
 
     private _handleAppPointerOut = (_event: PointerEvent) => {
         this._hoverMarker.visible = false;
-        this._sendPointerEvent(OutMessageType.PointerOut);
+        // this._sendPointerEvent(OutMessageType.PointerOut);
     };
 
     private _handleCloseMenu = (_event: object) => {
@@ -164,36 +164,36 @@ export class SelectionManager {
         this._selectionMarker.addChild(this._activeMenu);
     }
 
-    private _sendPosition = (position: PointData) => {
-        const localUser = this._scene.userService.getLocalUser();
+    // private _sendPosition = (position: PointData) => {
+    //     const localUser = this._scene.userService.getLocalUser();
 
-        if (!localUser)
-            return;
+    //     if (!localUser)
+    //         return;
 
-        ConnectionManager.instance.send({
-            name: OutMessageType.PointerPosition,
-            message: {
-                id: localUser.id,
-                timestamp: Scene.pageStart + performance.now(),
-                data: {
-                    position: { ...position },
-                },
-            },
-        });
-    };
+    //     ConnectionManager.instance.send({
+    //         name: OutMessageType.PointerPosition,
+    //         message: {
+    //             id: localUser.id,
+    //             timestamp: Scene.pageStart + performance.now(),
+    //             data: {
+    //                 position: { ...position },
+    //             },
+    //         },
+    //     });
+    // };
 
-    private _sendPointerEvent(name: (OutMessageType.PointerOut | OutMessageType.PointerEnter)) {
-        const localUser = this._scene.userService.getLocalUser();
+    // private _sendPointerEvent(name: (OutMessageType.PointerOut | OutMessageType.PointerEnter)) {
+    //     const localUser = this._scene.userService.getLocalUser();
 
-        if (!localUser)
-            return;
+    //     if (!localUser)
+    //         return;
 
-        ConnectionManager.instance.send({
-            name,
-            message: {
-                id: localUser.id,
-                timestamp: Scene.pageStart + performance.now(),
-            },
-        }); 
-    }
+    //     ConnectionManager.instance.send({
+    //         name,
+    //         message: {
+    //             id: localUser.id,
+    //             timestamp: Scene.pageStart + performance.now(),
+    //         },
+    //     }); 
+    // }
 }

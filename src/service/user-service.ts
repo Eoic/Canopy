@@ -4,7 +4,6 @@ import { UserRepository } from '../repository/user-repository';
 import { User, UserState } from '../registry/entities/user';
 import { UserDTO } from '../network/types/user';
 import { BufferedEvent } from '../network/types/message';
-import { Scene } from '../world/scene';
 
 export class UserService extends Service<UserRepository, UserRegistry> {
     public get repository(): UserRepository {
@@ -79,7 +78,6 @@ export class UserService extends Service<UserRepository, UserRegistry> {
         if (!user)
             return;
 
-        // FIXME: Why is the timestamp overwritten on the client?
-        user.eventsBuffer.push({ ...event, timestamp: Scene.pageStart + performance.now() });
+        user.eventsBuffer.push(event);
     }
 };
