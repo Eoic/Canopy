@@ -88,23 +88,23 @@ export class ConnectionManager {
             this._callbacks.message?.forEach((callback) => callback(data));
     };
 
-    public on<T extends keyof Callbacks>(event: T, callback: Flatten<Callbacks[T]>) {
+    public on<T extends keyof Callbacks>(event: T, callback: NonNullable<Callbacks[T]>[number]) {
         if (!this._callbacks[event])
             this._callbacks[event] = [];
 
-        this._callbacks[event].push(callback); // Ignore for now.
+        (this._callbacks[event] as Array<typeof callback>).push(callback);
     }
 
-    public off<T extends keyof Callbacks>(event: T, callback: Flatten<Callbacks[T]>) {
+    public off<T extends keyof Callbacks>(event: T, callback: NonNullable<Callbacks[T]>[number]) {
         if (!this._callbacks[event])
             return;
 
-        const index = this._callbacks[event].findIndex((cb) => cb === callback);
+        const index = (this._callbacks[event] as Array<typeof callback>).findIndex((cb) => cb === callback);
 
         if (index === -1)
             return;
 
-        this._callbacks[event].splice(index, 1);
+        (this._callbacks[event] as Array<typeof callback>).splice(index, 1);
     }
 
     public send<T extends OutMessageType>(data: OutMessages[T]) {

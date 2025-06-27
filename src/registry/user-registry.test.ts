@@ -9,7 +9,6 @@ describe('UserRegistry', () => {
         const user = new User({
             id: '1',
             isLocal: false,
-            position: { x: 0, y: 0 },
         });
 
         userRegistry.addEntity(user);
@@ -22,7 +21,6 @@ describe('UserRegistry', () => {
         const user = new User({
             id: '1',
             isLocal: false,
-            position: { x: 0, y: 0 },
         });
 
         userRegistry.addEntity(user);

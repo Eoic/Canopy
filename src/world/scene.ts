@@ -73,7 +73,7 @@ export class Scene {
                     if (this._userService.isLocalUser(entity.id))
                         return;
 
-                    // this._viewport.addChild(entity.cursor.container);
+                    // TODO: Handle user addition to the scene.
                 }
             });
 
@@ -82,7 +82,7 @@ export class Scene {
                     if (this._userService.isLocalUser(entity.id))
                         return;
 
-                    // this.viewport.removeChild(entity.cursor.container);
+                    // TODO: Handle user removal from the scene.
                 }
             });
 
@@ -258,9 +258,8 @@ export class Scene {
         this.updateBackground(this._background, { isReplaceNeeded: true });
     }
 
-    private handleUpdate = (ticker: PIXI.Ticker) => {
-        // for (const user of this._userService.getUsers())
-        // user.update(ticker.deltaMS, this._viewport.scale);
+    private handleUpdate = (_ticker: PIXI.Ticker) => {
+        // NOTE: Update the viewport and background on each tick.
     };
 
     private handleWindowResize = () => {
