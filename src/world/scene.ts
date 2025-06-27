@@ -35,7 +35,7 @@ export class Scene {
     private _positionConverter!: PositionConverter;
     private _userService!: UserService;
 
-    public static pageStart: number = performance.timeOrigin; 
+    public static pageStart: number = performance.timeOrigin;
 
     get app() {
         return this._app;

@@ -6,14 +6,10 @@ export enum InMessageType {
     Connect = 'CONNECT',
     Disconnect = 'DISCONNECT',
     State = 'STATE',
-    PointerOut = 'POINTER_OUT_OF_BOUNDS',
 };
 
 export enum OutMessageType {
     SwitchCell = 'SWITCH_CELL',
-    PointerPosition = 'POINTER_POSITION',
-    PointerEnter = 'POINTER_ENTER',
-    PointerOut = 'POINTER_OUT',
 };
 
 export type GenericEvent = {
@@ -22,25 +18,7 @@ export type GenericEvent = {
     is_transient: boolean,
 };
 
-export type PointerPositionEvent = {
-    name: 'POINTER_POSITION',
-    data: {
-        position: {
-            x: number,
-            y: number
-        }
-    }
-} & GenericEvent;
-
-export type PointerEnterEvent = {
-    name: 'POINTER_ENTER',
-} & GenericEvent;
-
-export type PointerOutEvent = {
-    name: 'POINTER_OUT',
-} & GenericEvent;
-
-export type BufferedEvent = PointerPositionEvent | PointerOutEvent | PointerEnterEvent;
+export type BufferedEvent = GenericEvent
 
 /**
  * Defines message message types coming
@@ -82,14 +60,6 @@ export type InMessages = {
             }>
         }
     },
-
-    [InMessageType.PointerOut]: {
-        name: InMessageType.PointerOut,
-        message: {
-            id: string,
-            timestamp: number,
-        }
-    },
 };
 
 /**
@@ -102,33 +72,6 @@ export type OutMessages = {
         message: {
             prevCell: { x: number, y: number } | null,
             nextCell: { x: number, y: number } | null,
-        }
-    },
-
-    [OutMessageType.PointerPosition]: {
-        name: OutMessageType.PointerPosition
-        message: {
-            id: string,
-            timestamp: number,
-            data: {
-                position: { x: number, y: number },
-            }
-        },
-    },
-
-    [OutMessageType.PointerEnter]: {
-        name: OutMessageType.PointerEnter,
-        message: {
-            id: string,
-            timestamp: number,
-        }
-    },
-
-    [OutMessageType.PointerOut]: {
-        name: OutMessageType.PointerOut,
-        message: {
-            id: string,
-            timestamp: number,
         }
     },
 };

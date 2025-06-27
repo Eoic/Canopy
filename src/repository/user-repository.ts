@@ -31,7 +31,7 @@ export class UserRepository extends Repository<UserDTO, User, UserRegistry> {
     public updateUser(id: string, data: Pick<UserState, keyof UserState>): User {
         this._registry.updateEntity(id, data);
         const user = this._registry.getEntity(id);
-    
+
         if (!user)
             throw new Error(`User with id ${id} does not exist.`);
 

@@ -29,10 +29,11 @@ async def websocket(websocket: WebSocket):
             is_transient = False
             data = await websocket.receive_json()
 
-            if data["name"] == "POINTER_POSITION":
-                is_transient = True
-            elif data["name"] == "POINTER_OUT":
-                is_transient = False
+            # Example event tagging.
+            # if data["name"] == "POINTER_POSITION":
+            #     is_transient = True
+            # elif data["name"] == "POINTER_OUT":
+            #     is_transient = False
 
             # Structure:
             # {

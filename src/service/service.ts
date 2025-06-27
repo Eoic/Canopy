@@ -1,8 +1,8 @@
-export class Service<REP, REG> {
-    protected _repository: REP;
-    protected _registry: REG;
+export class Service<Repository, Registry> {
+    protected _repository: Repository;
+    protected _registry: Registry;
 
-    constructor(repository: REP, registry: REG) {
+    constructor(repository: Repository, registry: Registry) {
         this._repository = repository;
         this._registry = registry;
     }

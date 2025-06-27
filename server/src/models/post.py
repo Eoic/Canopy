@@ -1,9 +1,4 @@
-import datetime
-
-from typing import Annotated, Optional
-from sqlalchemy import DateTime, func
-from fastapi import Depends, FastAPI, HTTPException, Query
-from sqlmodel import Field, Column, Session, SQLModel, create_engine, select
+from sqlmodel import Field, SQLModel
 
 
 class PostBase(SQLModel):

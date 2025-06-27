@@ -18,9 +18,9 @@ export async function request<T>(
     const headers = { 'Content-Type': 'application/json', ...(options.headers ?? {}) };
     const init: RequestInit = { ...options, headers };
 
-    if (options.body && typeof options.body !== 'string') 
+    if (options.body && typeof options.body !== 'string')
         init.body = JSON.stringify(options.body);
-  
+
     let response: Response;
 
     try {
