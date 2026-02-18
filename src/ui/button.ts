@@ -21,6 +21,7 @@ export class Button extends Container {
 
     private _build(options: ButtonOptions) {
         this.zIndex = Layer.MenuBG;
+        this.position.set(options.position.x, options.position.y);
 
         const icon = Assets.get<Texture>([`icon-${options.icon}`]);
 
@@ -28,18 +29,15 @@ export class Button extends Container {
             throw new Error('Could not load menu icon.');
 
         const iconGraphics = Sprite.from(icon['0']);
-        iconGraphics.position.set(options.position.x, options.position.y);
         iconGraphics.width = options.radius / 2 - options.padding;
         iconGraphics.height = options.radius / 2 - options.padding;
-
-        const bounds = iconGraphics.getLocalBounds();
-        iconGraphics.pivot.set((bounds.x + bounds.width) / 2, (bounds.y + bounds.height) / 2);
+        iconGraphics.anchor.set(0.5, 0.5);
         iconGraphics.zIndex = Layer.MenuFG;
 
         const buttonGraphics = new Graphics();
 
         buttonGraphics
-            .circle(options.position.x, options.position.y, 15)
+            .circle(0, 0, 15)
             .fill({ color: BUTTON.BACKGROUND_COLOR, alpha: 0.85 });
 
         this.addChild(buttonGraphics);
@@ -74,7 +72,7 @@ export class Button extends Container {
             return;
 
         this.tint = BUTTON.PRESS_TINT;
-        this.scale.set(0.95, 0.95);
+        this.scale.set(0.85, 0.85);
     };
 
     private _handlePointerUp = (event: FederatedPointerEvent) => {
