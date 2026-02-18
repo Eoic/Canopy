@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "client": "vite --host",
-    "server": "cd server && fastapi dev src/main.py",
+    "server": "cd server && npm run dev",
     "dev": "concurrently \"npm:client\" \"npm:server\"",
     "build": "vite build",
     "lint": "eslint src",
@@ -23,7 +23,9 @@
   "dependencies": {
     "@tweenjs/tween.js": "^25.0.0",
     "alpinejs": "^3.14.3",
+    "colyseus.js": "^0.15.0",
     "debounce": "^2.2.0",
+    "perfect-cursors": "^1.0.5",
     "pixi-viewport": "^5.0.3",
     "pixi.js": "^8.5.2",
     "throttle-debounce": "^5.0.2"

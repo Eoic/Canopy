@@ -12,13 +12,14 @@ import {
 } from '../constants';
 import { Layer } from './layers';
 import { SelectionManager } from './selection-manager';
-import { ActionsHandler } from './actions-handler';
+import { CursorManager } from './cursor-manager';
 import { PositionConverter } from '../math/position-converter';
 import { Vector } from '../math/vector';
 import { UI } from '../ui/ui';
 import { UserService } from '../service/user-service';
 import { UserRegistry } from '../registry/user-registry';
 import { UserRepository } from '../repository/user-repository';
+import { ColyseusClient } from '../network/colyseus-client';
 
 type ViewportEvent = {
     type: string;
@@ -31,11 +32,9 @@ export class Scene {
     private _app!: PIXI.Application;
     private _background!: PIXI.TilingSprite;
     private _selectionManager!: SelectionManager;
-    private _actionsHandler!: ActionsHandler;
+    private _cursorManager!: CursorManager;
     private _positionConverter!: PositionConverter;
     private _userService!: UserService;
-
-    public static pageStart: number = performance.timeOrigin;
 
     get app() {
         return this._app;
@@ -61,34 +60,40 @@ export class Scene {
             this._viewport.addChild(this._background);
             this._ui = new UI(this);
             this._selectionManager = new SelectionManager(this);
-            this._actionsHandler = new ActionsHandler(this._userService);
+            this._cursorManager = new CursorManager(this._viewport);
             this._positionConverter = new PositionConverter(this._viewport);
-            this._selectionManager.enable();
-            this._actionsHandler.enable();
             this._ui.enable();
             this._setupEvents();
 
-            this._userService.registry.onAdd((entities) => {
-                for (const entity of entities) {
-                    if (this._userService.isLocalUser(entity.id))
-                        return;
-
-                    // TODO: Handle user addition to the scene.
-                }
+            ColyseusClient.instance.on('onJoin', (room) => {
+                this._userService.addUser({ id: room.sessionId, isLocal: true });
+                this._selectionManager.enable();
+                this._cursorManager.enable();
+                console.info('Connected with sessionId:', room.sessionId);
             });
 
-            this._userService.registry.onRemove((entities) => {
-                for (const entity of entities) {
-                    if (this._userService.isLocalUser(entity.id))
-                        return;
+            ColyseusClient.instance.on('onLeave', () => {
+                const localUser = this._userService.getLocalUser();
+                if (localUser)
+                    this._userService.removeUser(localUser.id);
+                this._selectionManager.disable();
+                this._cursorManager.disable();
+                console.info('Disconnected from server');
+            });
 
-                    // TODO: Handle user removal from the scene.
-                }
+            ColyseusClient.instance.on('onError', (code, message) => {
+                console.error('Connection error:', code, message);
             });
 
             await this.loadAssets();
             this._app.ticker.start();
-            onReady();
+
+            ColyseusClient.instance.connect().then(() => {
+                onReady();
+            }).catch((error) => {
+                console.error('Failed to connect to Colyseus:', error);
+                onReady();
+            });
         }).catch((error) => {
             console.error(error);
         });

@@ -1,10 +1,12 @@
 import * as PIXI from 'pixi.js';
+import { throttle } from 'throttle-debounce';
 import { Scene } from './scene';
 import { Layer } from './layers';
 import { Vector } from '../math/vector';
 import { RadialMenu } from '../ui/radial-menu';
 import { CELL_SIZE, CELL_LINE_WIDTH, CELL_COLOR, CELL_FULL_SIZE } from '../constants';
 import { PointData } from 'pixi.js';
+import { ColyseusClient } from '../network/colyseus-client';
 
 export class SelectionManager {
     private _scene: Scene;
@@ -16,6 +18,10 @@ export class SelectionManager {
     private _focusedCell: Vector = new Vector();
     private _positionText: HTMLParagraphElement;
     private readonly _events: Record<string, EventListenerOrEventListenerObject> = {};
+
+    private readonly _sendCursorPosition = throttle(50, (x: number, y: number) => {
+        ColyseusClient.instance.sendCursorPosition(x, y);
+    });
 
     constructor(scene: Scene) {
         this._scene = scene;
@@ -114,6 +120,7 @@ export class SelectionManager {
         this._hoverMarker.position.set(worldPosition.x, worldPosition.y);
         this._hoverMarker.visible = true;
         this._positionText.innerText = `(X: ${cellPosition.x}, Y: ${cellPosition.y})`;
+        this._sendCursorPosition(position.x, position.y);
     };
 
     private _handleAppPointerEnter = (_event: PointerEvent) => {
@@ -122,6 +129,7 @@ export class SelectionManager {
 
     private _handleAppPointerOut = (_event: PointerEvent) => {
         this._hoverMarker.visible = false;
+        ColyseusClient.instance.sendCursorOut();
     };
 
     private _handleCloseMenu = (_event: object) => {
