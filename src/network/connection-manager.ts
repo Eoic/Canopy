@@ -10,7 +10,6 @@ type Callbacks = {
 export class ConnectionManager {
     public static LOG_LABEL = 'WebSocket';
     private static _instance: ConnectionManager | null = null;
-
     private _connection: WebSocket | null = null;
     private _callbacks: { [K in keyof Callbacks]: Callbacks[K] } = {};
 

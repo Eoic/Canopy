@@ -1,7 +1,7 @@
-import eslint from '@eslint/js';
-import tseslint from 'typescript-eslint';
+const eslint = require('@eslint/js');
+const tseslint = require('typescript-eslint');
 
-export default tseslint.config(
+module.exports = tseslint.config(
     eslint.configs.recommended,
     ...tseslint.configs.recommendedTypeChecked,
     {
@@ -9,7 +9,7 @@ export default tseslint.config(
         languageOptions: {
             parserOptions: {
                 project: './tsconfig.eslint.json',
-                tsconfigRootDir: import.meta.dirname,
+                tsconfigRootDir: __dirname,
             },
         },
         rules: {

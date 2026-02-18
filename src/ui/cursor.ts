@@ -6,6 +6,7 @@ export class Cursor extends PIXI.Container {
     private _cursor: PerfectCursor;
     private _graphics: PIXI.Graphics;
     private _userId: string;
+    private _hasInitialPoint: boolean = false;
 
     constructor(userId: string) {
         super();
@@ -38,6 +39,11 @@ export class Cursor extends PIXI.Container {
     }
 
     public addPoint(x: number, y: number): void {
+        if (!this._hasInitialPoint) {
+            this.position.set(x, y);
+            this._hasInitialPoint = true;
+        }
+
         this._cursor.addPoint([x, y]);
     }
 

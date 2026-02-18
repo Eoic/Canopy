@@ -80,4 +80,13 @@ export class UserService extends Service<UserRepository, UserRegistry> {
 
         user.eventsBuffer.push(event);
     }
+
+    public popEvent(id: string): BufferedEvent | null {
+        const user = this.getUser(id);
+
+        if (!user || user.eventsBuffer.length === 0)
+            return null;
+
+        return user.eventsBuffer.shift() || null;
+    }
 };

@@ -70,7 +70,6 @@ export class ColyseusClient {
 
             if (this._callbacks.onJoin && this._callbacks.onJoin.length > 0)
                 this._callbacks.onJoin.forEach((callback) => callback(this._room!));
-
         } catch (error) {
             console.error(`[${ColyseusClient.LOG_LABEL}] Failed to connect:`, error);
             throw error;
@@ -92,7 +91,8 @@ export class ColyseusClient {
     }
 
     public sendCursorOut(): void {
-        if (!this._room) return;
+        if (!this._room)
+            return;
 
         this._room.send('cursor_out');
     }
