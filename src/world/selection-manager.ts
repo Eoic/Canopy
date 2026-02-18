@@ -81,15 +81,30 @@ export class SelectionManager {
         return container;
     }
 
+    private _updatePointerState(event: PointerEvent) {
+        const position = this._scene.screenToRawWorld(event as unknown as PIXI.FederatedPointerEvent);
+        const worldPosition = this._scene.rawWorldToSnappedWorld(position);
+        const cellPosition = this._scene.rawWorldToCellIndex(worldPosition);
+        this._currentCell.set(cellPosition.x, cellPosition.y);
+        this._focusedCell.set(cellPosition.x, cellPosition.y);
+        this._hoverMarker.position.set(worldPosition.x, worldPosition.y);
+        this._hoverMarker.visible = true;
+        this._positionText.innerText = `(X: ${cellPosition.x}, Y: ${cellPosition.y})`;
+        this._sendCursorPosition(position.x, position.y);
+    }
+
     private _handleAppPointerDown = (event: PointerEvent) => {
         if (event.button !== 0)
             return;
 
-        this._focusedCell.copy(this._currentCell);
+        this._updatePointerState(event);
     };
 
     private _handleAppPointerUp = (event: PointerEvent) => {
         if (event.button !== 0)
+            return;
+
+        if (this._scene.isMoved)
             return;
 
         if (this._currentCell && this._currentCell.isEqual(this._focusedCell)) {
@@ -113,14 +128,7 @@ export class SelectionManager {
         if ((event as unknown as PIXI.FederatedPointerEvent).nativeEvent.target !== this._scene.app.canvas)
             return;
 
-        const position = this._scene.screenToRawWorld(event as unknown as PIXI.FederatedPointerEvent);
-        const worldPosition = this._scene.rawWorldToSnappedWorld(position);
-        const cellPosition = this._scene.rawWorldToCellIndex(worldPosition);
-        this._currentCell.set(cellPosition.x, cellPosition.y);
-        this._hoverMarker.position.set(worldPosition.x, worldPosition.y);
-        this._hoverMarker.visible = true;
-        this._positionText.innerText = `(X: ${cellPosition.x}, Y: ${cellPosition.y})`;
-        this._sendCursorPosition(position.x, position.y);
+        this._updatePointerState(event);
     };
 
     private _handleAppPointerEnter = (_event: PointerEvent) => {

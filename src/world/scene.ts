@@ -35,6 +35,7 @@ export class Scene {
     private _cursorManager!: CursorManager;
     private _positionConverter!: PositionConverter;
     private _userService!: UserService;
+    private _isMoved!: boolean;
 
     get app() {
         return this._app;
@@ -48,6 +49,14 @@ export class Scene {
         return this._userService;
     }
 
+    get isMoved() {
+        return this._isMoved;
+    }
+
+    set isMoved(value: boolean) {
+        this._isMoved = value;
+    }
+
     constructor(onReady: VoidFunction) {
         const userRegistry = new UserRegistry();
         const userRepository = new UserRepository(userRegistry);
@@ -55,6 +64,7 @@ export class Scene {
 
         this.setupApp(document.body).then(async (app: PIXI.Application) => {
             this._app = app;
+            this._isMoved = false;
             this._viewport = this.setupViewport(this._app);
             this._background = this.setupBackground();
             this._viewport.addChild(this._background);
@@ -145,6 +155,8 @@ export class Scene {
         viewport.moveCenter(0, 0);
         viewport.on('moved', this.handleViewportMoved);
         viewport.on('zoomed', this.handleViewportZoomed);
+        viewport.on('mouseup', this.handleViewportMouseUp);
+        viewport.on('touchend', this.handleViewportTouchEnd);
 
         return viewport;
     }
@@ -247,6 +259,12 @@ export class Scene {
         return this._positionConverter.screenToRawWorld(event);
     }
 
+    public screenToCellIndex(event: PIXI.FederatedPointerEvent): { x: number, y: number } {
+        const position = this.screenToRawWorld(event as unknown as PIXI.FederatedPointerEvent);
+        const worldPosition = this.rawWorldToSnappedWorld(position);
+        return this.rawWorldToCellIndex(worldPosition);
+    }
+
     public moveToCell(cellPosition: { x: number, y: number }) {
         this._viewport.setZoom(1, true);
         this._viewport.moveCenter(cellPosition.x * CELL_FULL_SIZE, cellPosition.y * CELL_HALF_SIZE);
@@ -283,10 +301,19 @@ export class Scene {
     };
 
     private handleViewportMoved = (_event: ViewportEvent) => {
+        this._isMoved = true;
         this.updateBackground(this._background);
     };
 
     private handleViewportZoomed = (_event: ViewportEvent) => {
         this.updateBackground(this._background, { isReplaceNeeded: true });
+    };
+
+    private handleViewportMouseUp = (_event: PIXI.FederatedMouseEvent) => {
+        this._isMoved = false;
+    };
+
+    private handleViewportTouchEnd = (_event: PIXI.FederatedPointerEvent) => {
+        this._isMoved = false;
     };
 }
