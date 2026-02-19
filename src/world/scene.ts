@@ -36,6 +36,7 @@ export class Scene {
     private _positionConverter!: PositionConverter;
     private _userService!: UserService;
     private _isMoved!: boolean;
+    private _touches!: Array<number>;
 
     get app() {
         return this._app;
@@ -53,10 +54,6 @@ export class Scene {
         return this._isMoved;
     }
 
-    set isMoved(value: boolean) {
-        this._isMoved = value;
-    }
-
     constructor(onReady: VoidFunction) {
         const userRegistry = new UserRegistry();
         const userRepository = new UserRepository(userRegistry);
@@ -69,6 +66,7 @@ export class Scene {
             this._background = this.setupBackground();
             this._viewport.addChild(this._background);
             this._ui = new UI(this);
+            this._touches = [];
             this._selectionManager = new SelectionManager(this);
             this._cursorManager = new CursorManager(this._viewport);
             this._positionConverter = new PositionConverter(this._viewport);
@@ -156,6 +154,7 @@ export class Scene {
         viewport.on('moved', this.handleViewportMoved);
         viewport.on('zoomed', this.handleViewportZoomed);
         viewport.on('mouseup', this.handleViewportMouseUp);
+        viewport.on('touchstart', (event: PIXI.FederatedPointerEvent) => this._touches.push(event.pointerId));
         viewport.on('touchend', this.handleViewportTouchEnd);
 
         return viewport;
@@ -310,10 +309,21 @@ export class Scene {
     };
 
     private handleViewportMouseUp = (_event: PIXI.FederatedMouseEvent) => {
-        this._isMoved = false;
+        this._clearMovedState();
     };
 
     private handleViewportTouchEnd = (_event: PIXI.FederatedPointerEvent) => {
-        this._isMoved = false;
+        this._touches = this._touches.filter((id) => _event.pointerId != id);
+        this._clearMovedState();
     };
+
+    /**
+     * On multi-touch event, do not rest the `isMoved` flag to false until
+     * all fingers are released from the screen. This prevents `SelectionManager`
+     * handlers from firing prematurely on mobile devices.
+     */
+    private _clearMovedState() {
+        if (this._isMoved && this._touches.length === 0) 
+            this._isMoved = false;
+    }
 }

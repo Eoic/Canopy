@@ -52,12 +52,12 @@ export class SelectionManager {
 
     private _addEvents() {
         for (const [eventName, handler] of Object.entries(this._events))
-            this._scene.viewport.addEventListener(eventName, handler);
+            this._scene.viewport.on(eventName, handler as (...args: unknown[]) => void);
     }
 
     private _removeEvents() {
         for (const [eventName, handler] of Object.entries(this._events))
-            this._scene.viewport.removeEventListener(eventName, handler);
+            this._scene.viewport.off(eventName, handler as (...args: unknown[]) => void);
     }
 
     private _setupMarker(fillColor: number, layerZIndex: number): PIXI.Container {
@@ -88,9 +88,11 @@ export class SelectionManager {
         this._currentCell.set(cellPosition.x, cellPosition.y);
         this._focusedCell.set(cellPosition.x, cellPosition.y);
         this._hoverMarker.position.set(worldPosition.x, worldPosition.y);
-        this._hoverMarker.visible = true;
         this._positionText.innerText = `(X: ${cellPosition.x}, Y: ${cellPosition.y})`;
         this._sendCursorPosition(position.x, position.y);
+
+        if (!PIXI.isMobile.any) 
+            this._hoverMarker.visible = true;
     }
 
     private _handleAppPointerDown = (event: PointerEvent) => {
