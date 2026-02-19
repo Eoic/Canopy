@@ -83,6 +83,20 @@ export class ColyseusClient {
         }
     }
 
+    public lockCell(x: number, y: number) {
+        if (!this._room)
+            return;
+
+        this._room.send('lock_cell', { x, y });
+    }
+
+    public unlockCell() {
+        if (!this._room)
+            return;
+
+        this._room.send('unlock_cell');
+    }
+
     public sendCursorPosition(x: number, y: number): void {
         if (!this._room)
             return;

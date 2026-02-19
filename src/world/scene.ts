@@ -82,8 +82,10 @@ export class Scene {
 
             ColyseusClient.instance.on('onLeave', () => {
                 const localUser = this._userService.getLocalUser();
+
                 if (localUser)
                     this._userService.removeUser(localUser.id);
+
                 this._selectionManager.disable();
                 this._cursorManager.disable();
                 console.info('Disconnected from server');
@@ -93,15 +95,17 @@ export class Scene {
                 console.error('Connection error:', code, message);
             });
 
+            if (ColyseusClient.instance.isConnected) {
+                const room = ColyseusClient.instance.room!;
+                this._userService.addUser({ id: room.sessionId, isLocal: true });
+                this._selectionManager.enable();
+                this._cursorManager.enable();
+                console.info('Connected with sessionId:', room.sessionId);
+            }
+
             await this.loadAssets();
             this._app.ticker.start();
-
-            ColyseusClient.instance.connect().then(() => {
-                onReady();
-            }).catch((error) => {
-                console.error('Failed to connect to Colyseus:', error);
-                onReady();
-            });
+            onReady();
         }).catch((error) => {
             console.error(error);
         });

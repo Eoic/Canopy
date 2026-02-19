@@ -30,7 +30,8 @@ export class CursorManager {
         const localSessionId = ColyseusClient.instance.sessionId;
 
         state.players.onAdd((player: Player, sessionId: string) => {
-            if (sessionId === localSessionId) return;
+            if (sessionId === localSessionId)
+                return;
 
             const cursor = new Cursor(sessionId);
             cursor.zIndex = Layer.Cursor;
