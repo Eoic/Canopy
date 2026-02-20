@@ -4,7 +4,7 @@ export const WORLD_WIDTH = 1000;
 export const WORLD_HEIGHT = 1000;
 
 // - Zooming.
-export const ZOOM = { MIN: 0.25, MAX: 5 };
+export const ZOOM = { MIN: 0.25, MAX: 5, DEFAULT: 1, DELTA: 100 };
 
 // - World cell config.
 export const CELL_SIZE = 100;

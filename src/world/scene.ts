@@ -155,11 +155,11 @@ export class Scene {
 
         viewport.sortableChildren = true;
         viewport.moveCenter(0, 0);
-        viewport.on('moved', this.handleViewportMoved);
-        viewport.on('zoomed', this.handleViewportZoomed);
-        viewport.on('mouseup', this.handleViewportMouseUp);
+        viewport.on('moved', this._handleViewportMoved);
+        viewport.on('zoomed', this._handleViewportZoomed);
+        viewport.on('mouseup', this._handleViewportMouseUp);
         viewport.on('touchstart', (event: PIXI.FederatedPointerEvent) => this._touches.push(event.pointerId));
-        viewport.on('touchend', this.handleViewportTouchEnd);
+        viewport.on('touchend', this._handleViewportTouchEnd);
 
         return viewport;
     }
@@ -217,9 +217,9 @@ export class Scene {
     }
 
     private _setupEvents() {
-        window.addEventListener('resize', this.handleWindowResize);
-        window.addEventListener('mousedown', this.handleWindowMouseDown);
-        this._app.ticker.add(this.handleUpdate);
+        window.addEventListener('resize', this._handleWindowResize);
+        window.addEventListener('mousedown', this._handleWindowMouseDown);
+        this._app.ticker.add(this._handleUpdate);
     }
 
     public async loadAssets() {
@@ -246,6 +246,29 @@ export class Scene {
         }
     }
 
+
+    public createCellMarker(fillColor: number, layerZIndex: number, alpha: number = 1.0): PIXI.Container {
+        const graphics = new PIXI.Graphics();
+        const container = new PIXI.Container();
+
+        graphics
+            .rect(0, 0, CELL_SIZE - CELL_LINE_WIDTH, CELL_SIZE - CELL_LINE_WIDTH)
+            .fill(fillColor);
+
+        const texture = this.app.renderer.generateTexture(graphics);
+        const marker = new PIXI.Sprite(texture);
+        marker.alpha = alpha;
+
+        container.pivot.x = marker.texture.width / 2;
+        container.pivot.y = marker.texture.height / 2;
+        container.visible = false;
+        container.zIndex = layerZIndex;
+        container.position.set(0, 0);
+        container.addChild(marker);
+
+        return container;
+    }
+
     public rawWorldToSnappedWorld(position: { x: number, y: number }): { x: number, y: number } {
         return this._positionConverter.rawWorldToSnappedWorld(position);
     }
@@ -269,32 +292,32 @@ export class Scene {
     }
 
     public moveToCell(cellPosition: { x: number, y: number }) {
-        this._viewport.setZoom(1, true);
+        this._viewport.setZoom(ZOOM.DEFAULT, true);
         this._viewport.moveCenter(cellPosition.x * CELL_FULL_SIZE, cellPosition.y * CELL_HALF_SIZE);
         this.updateBackground(this._background, { isReplaceNeeded: true });
     }
 
     public zoomIn() {
-        this._viewport.zoom(-100, true);
+        this._viewport.zoom(-ZOOM.DELTA, true);
         this.updateBackground(this._background, { isReplaceNeeded: true });
     }
 
     public zoomOut() {
-        this._viewport.zoom(100, true);
+        this._viewport.zoom(ZOOM.DELTA, true);
         this.updateBackground(this._background, { isReplaceNeeded: true });
     }
 
-    private handleUpdate = (_ticker: PIXI.Ticker) => {
+    private _handleUpdate = (_ticker: PIXI.Ticker) => {
         // NOTE: Update the viewport and background on each tick.
     };
 
-    private handleWindowResize = () => {
+    private _handleWindowResize = () => {
         this._app?.resize();
         this._viewport?.resize(window.innerWidth, window.innerHeight);
         this.updateBackground(this._background, { isReplaceNeeded: true });
     };
 
-    private handleWindowMouseDown = (event: MouseEvent) => {
+    private _handleWindowMouseDown = (event: MouseEvent) => {
         if (event.button === 1) {
             event.preventDefault();
             return false;
@@ -303,20 +326,27 @@ export class Scene {
         return true;
     };
 
-    private handleViewportMoved = (_event: ViewportEvent) => {
-        this._isMoved = true;
+    private _handleViewportMoved = (_event: ViewportEvent) => {
+        if (PIXI.isMobile.any)
+            this._isMoved = true;
+
         this.updateBackground(this._background);
     };
 
-    private handleViewportZoomed = (_event: ViewportEvent) => {
+    private _handleViewportZoomed = (_event: ViewportEvent) => {
         this.updateBackground(this._background, { isReplaceNeeded: true });
     };
 
-    private handleViewportMouseUp = (_event: PIXI.FederatedMouseEvent) => {
+    private _handleViewportMouseUp = (_event: PIXI.FederatedMouseEvent) => {
         this._clearMovedState();
     };
 
-    private handleViewportTouchEnd = (_event: PIXI.FederatedPointerEvent) => {
+    /**
+     * Clear touch from the touches list by its id. This let's us 
+     * keep track of many fingers are currently on the screen.
+     * @param _event PIXI pointer event.
+     */
+    private _handleViewportTouchEnd = (_event: PIXI.FederatedPointerEvent) => {
         this._touches = this._touches.filter((id) => _event.pointerId != id);
         this._clearMovedState();
     };

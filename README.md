@@ -10,7 +10,7 @@ It's spatial, community-driven forum where conversations grow like forests. Inst
 ### How it works?
 
 1. Any user can plant a tree anywhere in the grid. Each tree represents a single comment, question or idea.
-2. To reply, users plant a new tree within a circular radius of the original. This creates a spatial "reply" relationship that mirrors real conversation flow in the layout of the forest.
+2. To reply, users plant a new tree linked the original. This creates a spatial "reply" relationship that mirrors real conversation flow in the layout of the forest.
 3. Trees grow in stages based on interaction such as new replies and upvotes. Each interaction contributes to a tree's growth percentage - once reaches 100%, the tree advances to the next growth stage.
 4. Tree type depends on the intention - different species of trees represent different types of posts. There are questions, opinions, ideas, and news.
 5. Selecting a tree opens a side panel with a traditional view of the thread.
