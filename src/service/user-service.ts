@@ -3,7 +3,6 @@ import { UserRegistry } from '../registry/user-registry';
 import { UserRepository } from '../repository/user-repository';
 import { User, UserState } from '../registry/entities/user';
 import { UserDTO } from '../network/types/user';
-import { BufferedEvent } from '../network/types/message';
 
 export class UserService extends Service<UserRepository, UserRegistry> {
     public get repository(): UserRepository {
@@ -12,19 +11,6 @@ export class UserService extends Service<UserRepository, UserRegistry> {
 
     public get registry(): UserRegistry {
         return this._registry;
-    }
-
-    public async loadConnectedUsers(localUserId: string) {
-        try {
-            const users = await this._repository.fetchUsers(localUserId);
-
-            for (const user of users) {
-                if (!this.isLocalUser(user.id))
-                    this.addUser(user);
-            }
-        } catch (error) {
-            console.error('Failed to fetch users:', error);
-        }
     }
 
     public getUser(id: string): User | null {
@@ -70,23 +56,5 @@ export class UserService extends Service<UserRepository, UserRegistry> {
 
     public removeUser(id: string) {
         this.repository.removeUser(id);
-    }
-
-    public pushEvent(id: string, event: BufferedEvent) {
-        const user = this.getUser(id);
-
-        if (!user)
-            return;
-
-        user.eventsBuffer.push(event);
-    }
-
-    public popEvent(id: string): BufferedEvent | null {
-        const user = this.getUser(id);
-
-        if (!user || user.eventsBuffer.length === 0)
-            return null;
-
-        return user.eventsBuffer.shift() || null;
     }
 };

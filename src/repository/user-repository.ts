@@ -1,15 +1,9 @@
 import { User, UserState } from '../registry/entities/user';
 import { Repository } from './repository';
-import { UserAPI } from '../api/users';
 import { UserRegistry } from '../registry/user-registry';
 import { UserDTO } from '../network/types/user';
 
 export class UserRepository extends Repository<UserDTO, User, UserRegistry> {
-    public async fetchUsers(localUserId: string): Promise<UserDTO[]> {
-        const usersData = await UserAPI.fetchAll(localUserId);
-        return usersData.users;
-    }
-
     public hydrate(dto: UserDTO): User {
         return new User(dto);
     }

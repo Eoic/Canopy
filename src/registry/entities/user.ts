@@ -1,9 +1,8 @@
-import { EventsBuffer, UserDTO } from '../../network/types/user';
+import { UserDTO } from '../../network/types/user';
 
 export type UserState = {
     id: string;
     isLocal: boolean;
-    eventsBuffer: EventsBuffer;
 };
 
 export class User {
@@ -13,14 +12,9 @@ export class User {
         return this._state.id;
     }
 
-    get eventsBuffer(): EventsBuffer {
-        return this._state.eventsBuffer;
-    }
-
     constructor(data: UserDTO) {
         this._state = {
             id: data.id,
-            eventsBuffer: [],
             isLocal: data.isLocal,
         };
     }
@@ -35,5 +29,4 @@ export class User {
 
         return updatedKeys;
     }
-
 }
