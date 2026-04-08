@@ -5,9 +5,9 @@ Create and engage in real-time discussions to grow infinite virtual forests.
 ## About
 ### What is this?
 
-It's spatial, community-driven forum where conversations grow like forests. Instead of linear threads, you plant virtual trees on an infinite, shared grid - each tree representing a message, idea, or reply. Over time, clusters of trees form a virtual forest.
+It's spatial, community-driven forum where conversations grow like forests. Instead of linear threads, you plant virtual trees on an infinite, shared grid, where each tree represents a message, idea, or reply. Over time, clusters of trees form a forest.
 
-### How it works?
+### How does it work?
 
 1. Any user can plant a tree anywhere in the grid. Each tree represents a single comment, question or idea.
 2. To reply, users plant a new tree linked the original. This creates a spatial "reply" relationship that mirrors real conversation flow in the layout of the forest.
